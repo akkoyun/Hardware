@@ -1,0 +1,12 @@
+[submodule "Modules/B107AA"]
+	path = Modules/B107AA
+	url = https://github.com/akkoyun/B107AA
+[submodule "Modules/B108AA"]
+	path = Modules/B108AA
+	url = https://github.com/akkoyun/B108AA
+[submodule "Modules/B152BA"]
+	path = Modules/B152BA
+	url = https://github.com/akkoyun/B152BA
+[submodule "Modules/B153AA"]
+	path = Modules/B153AA
+	url = https://github.com/akkoyun/B153AA

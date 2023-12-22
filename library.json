@@ -1,0 +1,29 @@
+{
+	"name": "Hardware",
+	"version": "2.0.0",
+	"keywords": "AVR, Functions, Atmel, STF, Modules, B107, B108",
+	"description": "Hardware definitions of self made modules for AVR microcontrollers.",
+	"authors": [
+		{
+			"name": "Mehmet Gunce Akkoyun",
+			"email": "akkoyun@me.com",
+			"url": "https://github.com/akkoyun"
+		},
+		{
+			"name": "Mustafa Recep Senbas",
+			"email": "recepsenbas@gmail.com",
+			"url": "https://github.com/recepsenbas"
+		}
+	],
+	"license": "MIT",
+	"frameworks": "arduino",
+	"headers": "Hardware.h",
+	"platforms": [
+		"atmelavr",
+		"atmelmegaavr"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/akkoyun/Hardware.git"
+	}
+}
