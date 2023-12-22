@@ -17,16 +17,16 @@
 
 	// Get Module PinOut
 	#ifdef _B107AA_
-		#include "Modules/B107AA/PinDefinition.h"
+		#include "Boards/B107AA/PinDefinition.h"
 	#endif
 	#ifdef _B108AA_
-		#include "Modules/B108AA/PinDefinition.h"
+		#include "Boards/B108AA/PinDefinition.h"
 	#endif
 	#ifdef _B152BA_
-		#include "Modules/B152BA/PinDefinition.h"
+		#include "Boards/B152BA/PinDefinition.h"
 	#endif
 	#ifdef _B153AA_
-		#include "Modules/B153AA/PinDefinition.h"
+		#include "Boards/B153AA/PinDefinition.h"
 	#endif
 
 	// Define LED Colors
