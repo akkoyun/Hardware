@@ -1,6 +1,6 @@
 {
 	"name": "Hardware",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"keywords": "AVR, Functions, Atmel, STF, Modules, B107, B108",
 	"description": "Hardware definitions of self made modules for AVR microcontrollers.",
 	"authors": [

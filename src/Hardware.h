@@ -62,8 +62,8 @@
 					PORT_INT_RTC |= (1 << PIN_INT_RTC);
 
 					// Set 3V8_EN as Output with Pull-Down
-	//				DDR_3V8_EN |= (1 << PIN_3V8_EN);
-	//				PORT_3V8_EN &= ~(1 << PIN_3V8_EN);
+					DDR_3V8_EN |= (1 << PIN_3V8_EN);
+					PORT_3V8_EN &= ~(1 << PIN_3V8_EN);
 
 					// Set RS485_DIR as Output with Pull-Down
 					DDR_RS485_DIR |= (1 << PIN_RS485_DIR);
@@ -587,8 +587,8 @@
 					#define INT_CHARGER (((PIN_REGISTER_INT_CHARGER) >> (PIN_INT_CHARGER)) & 0x01)
 
 					// Set INT6 as falling edge triggered Interrupt
-					this->INT6_Interrupt(true, false);
-					#define INT_GAUGE (((PIN_REGISTER_INT_GAUGE) >> (PIN_INT_GAUGE)) & 0x01)
+//					this->INT6_Interrupt(true, false);
+//					#define INT_GAUGE (((PIN_REGISTER_INT_GAUGE) >> (PIN_INT_GAUGE)) & 0x01)
 
 					// Set PCINT4, PCINT5, PCINT6, PCINT7 Interrupt
 					this->PCIE0_Interrupt(false, false, false, false, true, true, true, true);
