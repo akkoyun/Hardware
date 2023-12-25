@@ -583,8 +583,8 @@
 					#define INT_RS485 (((PIN_REGISTER_INT_RS485) >> (PIN_INT_RS485)) & 0x01)
 
 					// Set INT5 as falling edge triggered Interrupt
-					this->INT5_Interrupt(true, false);
-					#define INT_CHARGER (((PIN_REGISTER_INT_CHARGER) >> (PIN_INT_CHARGER)) & 0x01)
+//					this->INT5_Interrupt(true, false);
+//					#define INT_CHARGER (((PIN_REGISTER_INT_CHARGER) >> (PIN_INT_CHARGER)) & 0x01)
 
 					// Set INT6 as falling edge triggered Interrupt
 //					this->INT6_Interrupt(true, false);
