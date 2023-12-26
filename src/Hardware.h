@@ -622,6 +622,17 @@
 			// Public Context
 			public:
 
+				// Declare Global Timer Variable
+				// b7 :
+				// b6 : 
+				// b5 :
+				// b4 :
+				// b3 :
+				// b2 : Battery Gauge updater
+				// b1 : Environment updater
+				// b0 : Up time updater
+				uint8_t Global_Timer = 0x00;
+
 				// Module Constructor
 				Hardware(void) {
 
@@ -775,7 +786,7 @@
 					PORT_HEARTBEAT |= (1 << PIN_HEARTBEAT);
 
 					// HeartBeat LED Blink
-					if (_LED) this->LED(GREEN, 1, 100);
+					if (_LED) this->LED(GREEN, 1, 50);
 
 					// Turn OFF HeartBeat
 					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);
