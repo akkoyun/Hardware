@@ -622,16 +622,13 @@
 			// Public Context
 			public:
 
-				// Declare Global Timer Variable
-				// b7 :
-				// b6 : 
-				// b5 :
-				// b4 :
-				// b3 :
-				// b2 : Battery Gauge updater
-				// b1 : Environment updater
-				// b0 : Up time updater
-				uint8_t Global_Timer = 0x00;
+				// Bool Controller
+				#define Up_Time_Control 	0
+				#define Environment_Control 1
+				#define Battery_Control 	2
+				#define Input_Control 		3
+				#define Energy_Control 		4
+				uint8_t Bool_Controller = 0x10;
 
 				// Module Constructor
 				Hardware(void) {
