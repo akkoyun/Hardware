@@ -628,6 +628,8 @@
 				#define Battery_Control 	2
 				#define Input_Control 		3
 				#define Energy_Control 		4
+				#define Status_Update		5
+				#define Environment_INT		6
 				uint8_t Bool_Controller = 0x10;
 
 				// Module Constructor
