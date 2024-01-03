@@ -176,6 +176,30 @@
 					// Set HEARTBEAT as Output with Pull-Down
 					DDR_HEARTBEAT |= (1 << PIN_HEARTBEAT);
 					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);
+
+					// Define Terminal Sense Macro
+					#define TERMINAL_SENSE (((PIN_REGISTER_TERMINAL_SENSE) >> (PIN_TERMINAL_SENSE)) & 0x01)
+
+					// Define Input Port Macros
+					#define SENSE_PHASE_R (((PIN_REGISTER_3V3_Sense_1) >> (PIN_3V3_Sense_1)) & 0x01)
+					#define SENSE_PHASE_S (((PIN_REGISTER_3V3_Sense_2) >> (PIN_3V3_Sense_2)) & 0x01)
+					#define SENSE_PHASE_T (((PIN_REGISTER_3V3_Sense_3) >> (PIN_3V3_Sense_3)) & 0x01)
+					#define SENSE_M1 (((PIN_REGISTER_3V3_Sense_4) >> (PIN_3V3_Sense_4)) & 0x01)
+					#define SENSE_M2 (((PIN_REGISTER_3V3_Sense_5) >> (PIN_3V3_Sense_5)) & 0x01)
+					#define SENSE_M3 (((PIN_REGISTER_3V3_Sense_6) >> (PIN_3V3_Sense_6)) & 0x01)
+					#define SENSE_TH (((PIN_REGISTER_3V3_Sense_7) >> (PIN_3V3_Sense_7)) & 0x01)
+					#define SENSE_MP (((PIN_REGISTER_3V3_Sense_8) >> (PIN_3V3_Sense_8)) & 0x01)
+
+					// Define Interrupt Port Macros
+					#define INT_ENERGY_1 (((PIN_REGISTER_INT_ENERGY_1) >> (PIN_INT_ENERGY_1)) & 0x01)	// PCINT4
+					#define INT_ENERGY_2 (((PIN_REGISTER_INT_ENERGY_2) >> (PIN_INT_ENERGY_2)) & 0x01)	// PCINT5
+					#define INT_ENVIRONMENT (((PIN_REGISTER_INT_ENV) >> (PIN_INT_ENV)) & 0x01)			// PCINT6
+					#define INT_RTC (((PIN_REGISTER_INT_RTC) >> (PIN_INT_RTC)) & 0x01)					// PCINT7
+					#define INT_RS485 (((PIN_REGISTER_INT_RS485) >> (PIN_INT_RS485)) & 0x01)
+					#define INT_GSM_RING (((PIN_REGISTER_GSM_RING) >> (PIN_GSM_RING)) & 0x01)			// PCINT11
+					#define INT_GSM_PMON (((PIN_REGISTER_GSM_PMON) >> (PIN_GSM_PMON)) & 0x01)			// PCINT12
+					#define INT_GSM_SWREADY (((PIN_REGISTER_GSM_SWREADY) >> (PIN_GSM_SWREADY)) & 0x01)	// PCINT13
+
 				}
 
 				// Module 1 Second Timer
@@ -324,7 +348,6 @@
 
 					// Set INT4 as falling edge triggered Interrupt
 					this->INT4_Interrupt(true, false);
-					#define INT_RS485 (((PIN_REGISTER_INT_RS485) >> (PIN_INT_RS485)) & 0x01)
 
 					// Set INT5 as falling edge triggered Interrupt
 //					this->INT5_Interrupt(true, false);
@@ -336,27 +359,12 @@
 
 					// Set PCINT4, PCINT5, PCINT6, PCINT7 Interrupt
 					this->PCIE0_Interrupt(false, false, false, false, true, true, true, true);
-					#define INT_ENERGY_1 (((PIN_REGISTER_INT_ENERGY_1) >> (PIN_INT_ENERGY_1)) & 0x01)	// PCINT4
-					#define INT_ENERGY_2 (((PIN_REGISTER_INT_ENERGY_2) >> (PIN_INT_ENERGY_2)) & 0x01)	// PCINT5
-					#define INT_ENVIRONMENT (((PIN_REGISTER_INT_ENV) >> (PIN_INT_ENV)) & 0x01)			// PCINT6
-					#define INT_RTC (((PIN_REGISTER_INT_RTC) >> (PIN_INT_RTC)) & 0x01)					// PCINT7
 
 					// Set PCINT11, PCINT12, PCINT13 Interrupt
 					this->PCIE1_Interrupt(false, false, false, true, true, true, false, false);
-					#define INT_GSM_RING (((PIN_REGISTER_GSM_RING) >> (PIN_GSM_RING)) & 0x01)			// PCINT11
-					#define INT_GSM_PMON (((PIN_REGISTER_GSM_PMON) >> (PIN_GSM_PMON)) & 0x01)			// PCINT12
-					#define INT_GSM_SWREADY (((PIN_REGISTER_GSM_SWREADY) >> (PIN_GSM_SWREADY)) & 0x01)	// PCINT13
 
 					// Set PCINT16, PCINT17, PCINT18, PCINT19, PCINT20, PCINT21, PCINT22, PCINT23 Interrupt
 					this->PCIE2_Interrupt(true, true, true, true, true, true, true, true);
-					#define INT_SENSE_1 (((PIN_REGISTER_3V3_Sense_1) >> (PIN_3V3_Sense_1)) & 0x01)		// PCINT16
-					#define INT_SENSE_2 (((PIN_REGISTER_3V3_Sense_2) >> (PIN_3V3_Sense_2)) & 0x01)		// PCINT17
-					#define INT_SENSE_3 (((PIN_REGISTER_3V3_Sense_3) >> (PIN_3V3_Sense_3)) & 0x01)		// PCINT18
-					#define INT_SENSE_4 (((PIN_REGISTER_3V3_Sense_4) >> (PIN_3V3_Sense_4)) & 0x01)		// PCINT19
-					#define INT_SENSE_5 (((PIN_REGISTER_3V3_Sense_5) >> (PIN_3V3_Sense_5)) & 0x01)		// PCINT20
-					#define INT_SENSE_6 (((PIN_REGISTER_3V3_Sense_6) >> (PIN_3V3_Sense_6)) & 0x01)		// PCINT21
-					#define INT_SENSE_7 (((PIN_REGISTER_3V3_Sense_7) >> (PIN_3V3_Sense_7)) & 0x01)		// PCINT22
-					#define INT_SENSE_8 (((PIN_REGISTER_3V3_Sense_8) >> (PIN_3V3_Sense_8)) & 0x01)		// PCINT23
 
 					// Start Interrupts
 					sei();
