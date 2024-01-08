@@ -1,0 +1,36 @@
+// LED Definitions
+// -----------------------------
+
+// Define LED Colors
+#define LED_RED 	1
+#define LED_GREEN 	2
+#define LED_BLUE 	3
+#define LED_WHITE 	4
+#define LED_YELLOW 	5
+
+// PCINTx Definitions
+// -----------------------------
+#define INTERRUPT_PCINT0	0
+#define INTERRUPT_PCINT1	1
+#define INTERRUPT_PCINT2	2
+#define INTERRUPT_PCINT3	3
+#define INTERRUPT_PCINT4	4
+#define INTERRUPT_PCINT5	5
+#define INTERRUPT_PCINT6	6
+#define INTERRUPT_PCINT7	7
+#define INTERRUPT_PCINT8	8
+#define INTERRUPT_PCINT9	9
+#define INTERRUPT_PCINT10	10
+#define INTERRUPT_PCINT11	11
+#define INTERRUPT_PCINT12	12
+#define INTERRUPT_PCINT13	13
+#define INTERRUPT_PCINT14	14
+#define INTERRUPT_PCINT15	15
+#define INTERRUPT_PCINT16	16
+#define INTERRUPT_PCINT17	17
+#define INTERRUPT_PCINT18	18
+#define INTERRUPT_PCINT19	19
+#define INTERRUPT_PCINT20	20
+#define INTERRUPT_PCINT21	21
+#define INTERRUPT_PCINT22	22
+#define INTERRUPT_PCINT23	23

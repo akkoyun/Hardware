@@ -1,3 +1,6 @@
+// PIN Definitions
+// -----------------------------
+
 // RELAY_START Pin Definition
 #define DDR_RELAY_START 			DDRA
 #define PORT_RELAY_START			PORTA
@@ -207,3 +210,29 @@
 #define PORT_HEARTBEAT				PORTL
 #define PIN_REGISTER_HEARTBEAT		PINL
 #define PIN_HEARTBEAT				PL3
+
+// Macro Definitions
+// -----------------------------
+
+// Define Terminal Sense Macro
+#define TERMINAL_SENSE (((PIN_REGISTER_TERMINAL_SENSE) >> (PIN_TERMINAL_SENSE)) & 0x01)
+
+// Define Input Port Macros
+#define SENSE_PHASE_R (((PIN_REGISTER_3V3_Sense_1) >> (PIN_3V3_Sense_1)) & 0x01)
+#define SENSE_PHASE_S (((PIN_REGISTER_3V3_Sense_2) >> (PIN_3V3_Sense_2)) & 0x01)
+#define SENSE_PHASE_T (((PIN_REGISTER_3V3_Sense_3) >> (PIN_3V3_Sense_3)) & 0x01)
+#define SENSE_M1 (((PIN_REGISTER_3V3_Sense_4) >> (PIN_3V3_Sense_4)) & 0x01)
+#define SENSE_M2 (((PIN_REGISTER_3V3_Sense_5) >> (PIN_3V3_Sense_5)) & 0x01)
+#define SENSE_M3 (((PIN_REGISTER_3V3_Sense_6) >> (PIN_3V3_Sense_6)) & 0x01)
+#define SENSE_TH (((PIN_REGISTER_3V3_Sense_7) >> (PIN_3V3_Sense_7)) & 0x01)
+#define SENSE_MP (((PIN_REGISTER_3V3_Sense_8) >> (PIN_3V3_Sense_8)) & 0x01)
+
+// Define Interrupt Port Macros
+#define INT_ENERGY_1 (((PIN_REGISTER_INT_ENERGY_1) >> (PIN_INT_ENERGY_1)) & 0x01)	// PCINT4
+#define INT_ENERGY_2 (((PIN_REGISTER_INT_ENERGY_2) >> (PIN_INT_ENERGY_2)) & 0x01)	// PCINT5
+#define INT_ENVIRONMENT (((PIN_REGISTER_INT_ENV) >> (PIN_INT_ENV)) & 0x01)			// PCINT6
+#define INT_RTC (((PIN_REGISTER_INT_RTC) >> (PIN_INT_RTC)) & 0x01)					// PCINT7
+#define INT_RS485 (((PIN_REGISTER_INT_RS485) >> (PIN_INT_RS485)) & 0x01)
+#define INT_GSM_RING (((PIN_REGISTER_GSM_RING) >> (PIN_GSM_RING)) & 0x01)			// PCINT11
+#define INT_GSM_PMON (((PIN_REGISTER_GSM_PMON) >> (PIN_GSM_PMON)) & 0x01)			// PCINT12
+#define INT_GSM_SWREADY (((PIN_REGISTER_GSM_SWREADY) >> (PIN_GSM_SWREADY)) & 0x01)	// PCINT13
