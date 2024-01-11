@@ -218,14 +218,14 @@
 #define CONTROL_TERMINAL (((PIN_REGISTER_TERMINAL_SENSE) >> (PIN_TERMINAL_SENSE)) & 0x01)
 
 // Define Input Port Macros
-#define CONTROL_PHASE_R (((PIN_REGISTER_3V3_Sense_1) >> (PIN_3V3_Sense_1)) & 0x01)
-#define CONTROL_PHASE_S (((PIN_REGISTER_3V3_Sense_2) >> (PIN_3V3_Sense_2)) & 0x01)
-#define CONTROL_PHASE_T (((PIN_REGISTER_3V3_Sense_3) >> (PIN_3V3_Sense_3)) & 0x01)
-#define CONTROL_M1 (((PIN_REGISTER_3V3_Sense_4) >> (PIN_3V3_Sense_4)) & 0x01)
-#define CONTROL_M2 (((PIN_REGISTER_3V3_Sense_5) >> (PIN_3V3_Sense_5)) & 0x01)
-#define CONTROL_M3 (((PIN_REGISTER_3V3_Sense_6) >> (PIN_3V3_Sense_6)) & 0x01)
-#define CONTROL_TH (((PIN_REGISTER_3V3_Sense_7) >> (PIN_3V3_Sense_7)) & 0x01)
-#define CONTROL_MP (((PIN_REGISTER_3V3_Sense_8) >> (PIN_3V3_Sense_8)) & 0x01)
+#define CONTROL_PHASE_R (((PIN_REGISTER_SENSE_1) >> (PIN_SENSE_1)) & 0x01)
+#define CONTROL_PHASE_S (((PIN_REGISTER_SENSE_2) >> (PIN_SENSE_2)) & 0x01)
+#define CONTROL_PHASE_T (((PIN_REGISTER_SENSE_3) >> (PIN_SENSE_3)) & 0x01)
+#define CONTROL_M1 (((PIN_REGISTER_SENSE_4) >> (PIN_SENSE_4)) & 0x01)
+#define CONTROL_M2 (((PIN_REGISTER_SENSE_5) >> (PIN_SENSE_5)) & 0x01)
+#define CONTROL_M3 (((PIN_REGISTER_SENSE_6) >> (PIN_SENSE_6)) & 0x01)
+#define CONTROL_TH (((PIN_REGISTER_SENSE_7) >> (PIN_SENSE_7)) & 0x01)
+#define CONTROL_MP (((PIN_REGISTER_SENSE_8) >> (PIN_SENSE_8)) & 0x01)
 
 // Define Interrupt Port Macros
 #define CONTROL_ENERGY_1 (((PIN_REGISTER_INT_ENERGY_1) >> (PIN_INT_ENERGY_1)) & 0x01)	// PCINT4
