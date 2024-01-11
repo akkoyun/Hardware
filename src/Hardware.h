@@ -4,6 +4,7 @@
  *
  *	Library				: Hardware
  *	Code Developer		: Mehmet Gunce Akkoyun (akkoyun@me.com)
+ *						: Mustafa Recep Senbaş (recepsenbas@gmail.com)
  *
  *********************************************************************************/
 
@@ -15,8 +16,9 @@
 		#include <Arduino.h>
 	#endif
 
-	// Define Constants
+	// Include Config Files
 	#include "Config/Constants.h"
+	#include "Config/Macros.h"
 
 	// B107AA Class
 	#ifdef _B107AA_
@@ -32,524 +34,153 @@
 
 				// Module Pin Definitions
 				inline void Set_PinOut(void) {
-
-					// Set RELAY_START as Output with Pull-Down
-					DDR_RELAY_START |= (1 << PIN_RELAY_START);
-					PORT_RELAY_START &= ~(1 << PIN_RELAY_START);
-
-					// Set RELAY_STOP as Output with Pull-Down
-					DDR_RELAY_STOP |= (1 << PIN_RELAY_STOP);
-					PORT_RELAY_STOP &= ~(1 << PIN_RELAY_STOP);
-
-					// Set INT_ENERGY_1 as Input with Pull-Up
-					DDR_INT_ENERGY_1 &= ~(1 << PIN_INT_ENERGY_1);
-					PORT_INT_ENERGY_1 |= (1 << PIN_INT_ENERGY_1);
-
-					// Set INT_ENERGY_2 as Input with Pull-Up
-					DDR_INT_ENERGY_2 &= ~(1 << PIN_INT_ENERGY_2);
-					PORT_INT_ENERGY_2 |= (1 << PIN_INT_ENERGY_2);
-
-					// Set INT_ENV as Input with Pull-Up
-					DDR_INT_ENV &= ~(1 << PIN_INT_ENV);
-					PORT_INT_ENV |= (1 << PIN_INT_ENV);
-
-					// Set INT_RTC as Input with Pull-Up
-					DDR_INT_RTC &= ~(1 << PIN_INT_RTC);
-					PORT_INT_RTC |= (1 << PIN_INT_RTC);
-
-					// Set 3V8_EN as Output with Pull-Down
-					DDR_3V8_EN |= (1 << PIN_3V8_EN);
-					PORT_3V8_EN &= ~(1 << PIN_3V8_EN);
-
-					// Set RS485_DIR as Output with Pull-Down
-					DDR_RS485_DIR |= (1 << PIN_RS485_DIR);
-					PORT_RS485_DIR &= ~(1 << PIN_RS485_DIR);
-
-					// Set INT_RS485 as Input with Pull-Down
-					DDR_INT_RS485 &= ~(1 << PIN_INT_RS485);
-					PORT_INT_RS485 &= ~(1 << PIN_INT_RS485);
-
-					// Set INT_CHARGER as Input with Pull-Up
-					DDR_INT_CHARGER &= ~(1 << PIN_INT_CHARGER);
-					PORT_INT_CHARGER |= (1 << PIN_INT_CHARGER);
-
-					// Set INT_GAUGE as Input with Pull-Up
-					DDR_INT_GAUGE &= ~(1 << PIN_INT_GAUGE);
-					PORT_INT_GAUGE |= (1 << PIN_INT_GAUGE);
-
-					// Set 3V3_BUZZER as Output with Pull-Down
-					DDR_3V3_BUZZER |= (1 << PIN_3V3_BUZZER);
-					PORT_3V3_BUZZER &= ~(1 << PIN_3V3_BUZZER);
-
-					// Set LCD_SENSE as Input with Pull-Down
-					DDR_LCD_SENSE &= ~(1 << PIN_LCD_SENSE);
-					PORT_LCD_SENSE &= ~(1 << PIN_LCD_SENSE);
-
-					// Set FOTA_POWER_EN as Output with Pull-Down
-					DDR_FOTA_POWER_EN |= (1 << PIN_FOTA_POWER_EN);
-					PORT_FOTA_POWER_EN &= ~(1 << PIN_FOTA_POWER_EN);
-
-					// Set SD_SENSE as Input with Pull-Down
-					DDR_SD_SENSE &= ~(1 << PIN_SD_SENSE);
-					PORT_SD_SENSE &= ~(1 << PIN_SD_SENSE);
-
-					// Set SD_EN as Output with Pull-Down
-					DDR_SD_EN |= (1 << PIN_SD_EN);
-					PORT_SD_EN &= ~(1 << PIN_SD_EN);
-
-					// Set TERMINAL_SENSE as Input with Pull-Up
-					DDR_TERMINAL_SENSE &= ~(1 << PIN_TERMINAL_SENSE);
-					PORT_TERMINAL_SENSE |= (1 << PIN_TERMINAL_SENSE);
-
-					// Set GSM_RING as Input with Pull-Down
-					DDR_GSM_RING &= ~(1 << PIN_GSM_RING);
-					PORT_GSM_RING &= ~(1 << PIN_GSM_RING);
-
-					// Set GSM_PMON as Input with Pull-Down
-					DDR_GSM_PMON &= ~(1 << PIN_GSM_PMON);
-					PORT_GSM_PMON &= ~(1 << PIN_GSM_PMON);
-
-					// Set GSM_SWREADY as Input with Pull-Down
-					DDR_GSM_SWREADY &= ~(1 << PIN_GSM_SWREADY);
-					PORT_GSM_SWREADY &= ~(1 << PIN_GSM_SWREADY);
-
-					// Set GSM_COMM_EN as Output with Pull-Up
-					DDR_GSM_COMM_EN |= (1 << PIN_GSM_COMM_EN);
-					PORT_GSM_COMM_EN |= (1 << PIN_GSM_COMM_EN);
-
-					// Set GSM_ONOFF as Output with Pull-Down
-					DDR_GSM_ONOFF |= (1 << PIN_GSM_ONOFF);
-					PORT_GSM_ONOFF &= ~(1 << PIN_GSM_ONOFF);
-
-					// Set GSM_SDOWN as Output with Pull-Down
-					DDR_GSM_SDOWN |= (1 << PIN_GSM_SDOWN);
-					PORT_GSM_SDOWN &= ~(1 << PIN_GSM_SDOWN);
-
-					// Set 3V3_Sense_1 as Input with Pull-Down
-					DDR_3V3_Sense_1 &= ~(1 << PIN_3V3_Sense_1);
-					PORT_3V3_Sense_1 &= ~(1 << PIN_3V3_Sense_1);
-
-					// Set 3V3_Sense_2 as Input with Pull-Down
-					DDR_3V3_Sense_2 &= ~(1 << PIN_3V3_Sense_2);
-					PORT_3V3_Sense_2 &= ~(1 << PIN_3V3_Sense_2);
-
-					// Set 3V3_Sense_3 as Input with Pull-Down
-					DDR_3V3_Sense_3 &= ~(1 << PIN_3V3_Sense_3);
-					PORT_3V3_Sense_3 &= ~(1 << PIN_3V3_Sense_3);
-
-					// Set 3V3_Sense_4 as Input with Pull-Down
-					DDR_3V3_Sense_4 &= ~(1 << PIN_3V3_Sense_4);
-					PORT_3V3_Sense_4 &= ~(1 << PIN_3V3_Sense_4);
-
-					// Set 3V3_Sense_5 as Input with Pull-Down
-					DDR_3V3_Sense_5 &= ~(1 << PIN_3V3_Sense_5);
-					PORT_3V3_Sense_5 &= ~(1 << PIN_3V3_Sense_5);
-
-					// Set 3V3_Sense_6 as Input with Pull-Down
-					DDR_3V3_Sense_6 &= ~(1 << PIN_3V3_Sense_6);
-					PORT_3V3_Sense_6 &= ~(1 << PIN_3V3_Sense_6);
-
-					// Set 3V3_Sense_7 as Input with Pull-Down
-					DDR_3V3_Sense_7 &= ~(1 << PIN_3V3_Sense_7);
-					PORT_3V3_Sense_7 &= ~(1 << PIN_3V3_Sense_7);
-
-					// Set 3V3_Sense_8 as Input with Pull-Down
-					DDR_3V3_Sense_8 &= ~(1 << PIN_3V3_Sense_8);
-					PORT_3V3_Sense_8 &= ~(1 << PIN_3V3_Sense_8);
-
-					// Set MCU_LED_RED as Output with Pull-Down
-					DDR_MCU_LED_RED |= (1 << PIN_MCU_LED_RED);
-					PORT_MCU_LED_RED &= ~(1 << PIN_MCU_LED_RED);
-
-					// Set MCU_LED_GREEN as Output with Pull-Down
-					DDR_MCU_LED_GREEN |= (1 << PIN_MCU_LED_GREEN);
-					PORT_MCU_LED_GREEN &= ~(1 << PIN_MCU_LED_GREEN);
-
-					// Set MCU_LED_BLUE as Output with Pull-Down
-					DDR_MCU_LED_BLUE |= (1 << PIN_MCU_LED_BLUE);
-					PORT_MCU_LED_BLUE &= ~(1 << PIN_MCU_LED_BLUE);
-
-					// Set HEARTBEAT as Output with Pull-Down
-					DDR_HEARTBEAT |= (1 << PIN_HEARTBEAT);
-					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);
+					
+					// Set Module Pin Definitions
+					SET_PIN_OUTPUT_PULLDOWN(RELAY_START);		// Set RELAY_START as Output with Pull-Down
+					SET_PIN_OUTPUT_PULLDOWN(RELAY_STOP);		// Set RELAY_STOP as Output with Pull-Down
+					SET_PIN_INPUT_PULLUP(INT_ENERGY_1);			// Set INT_ENERGY_1 as Input with Pull-Up
+					SET_PIN_INPUT_PULLUP(INT_ENERGY_2);			// Set INT_ENERGY_2 as Input with Pull-Up
+					SET_PIN_INPUT_PULLUP(INT_ENV);				// Set INT_ENV as Input with Pull-Up
+					SET_PIN_INPUT_PULLUP(INT_RTC);				// Set INT_RTC as Input with Pull-Up
+					SET_PIN_OUTPUT_PULLDOWN(EN_3V8);			// Set 3V8_EN as Output with Pull-Down
+					SET_PIN_OUTPUT_PULLDOWN(RS485_DIR);			// Set RS485_DIR as Output with Pull-Down
+					SET_PIN_INPUT_PULLUP(INT_RS485);			// Set INT_RS485 as Input with Pull-Down
+					SET_PIN_INPUT_PULLUP(INT_CHARGER);			// Set INT_CHARGER as Input with Pull-Up
+					SET_PIN_INPUT_PULLUP(INT_GAUGE);			// Set INT_GAUGE as Input with Pull-Up
+					SET_PIN_OUTPUT_PULLDOWN(BUZZER);			// Set 3V3_BUZZER as Output with Pull-Down
+					SET_PIN_INPUT_PULLUP(LCD_SENSE);			// Set LCD_SENSE as Input with Pull-Down
+					SET_PIN_OUTPUT_PULLDOWN(FOTA_POWER_EN);		// Set FOTA_POWER_EN as Output with Pull-Down
+					SET_PIN_INPUT_PULLUP(SD_SENSE);				// Set SD_SENSE as Input with Pull-Down
+					SET_PIN_OUTPUT_PULLDOWN(SD_EN);				// Set SD_EN as Output with Pull-Down
+					SET_PIN_INPUT_PULLUP(TERMINAL_SENSE);		// Set TERMINAL_SENSE as Input with Pull-Up
+					SET_PIN_INPUT_PULLDOWN(GSM_RING);			// Set GSM_RING as Input with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(GSM_PMON);			// Set GSM_PMON as Input with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(GSM_SWREADY);		// Set GSM_SWREADY as Input with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(GSM_COMM_EN);		// Set GSM_COMM_EN as Input with Pull-Down
+					SET_PIN_OUTPUT_PULLDOWN(GSM_ONOFF);			// Set GSM_ONOFF as Output with Pull-Down
+					SET_PIN_OUTPUT_PULLDOWN(GSM_SDOWN);			// Set GSM_SDOWN as Output with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(SENSE_1);			// Set SENSE_1 as Input with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(SENSE_2);			// Set SENSE_2 as Input with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(SENSE_3);			// Set SENSE_3 as Input with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(SENSE_4);			// Set SENSE_4 as Input with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(SENSE_5);			// Set SENSE_5 as Input with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(SENSE_6);			// Set SENSE_6 as Input with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(SENSE_7);			// Set SENSE_7 as Input with Pull-Down
+					SET_PIN_INPUT_PULLDOWN(SENSE_8);			// Set SENSE_8 as Input with Pull-Down
+					SET_PIN_OUTPUT_PULLDOWN(MCU_LED_RED);		// Set MCU_LED_RED as Output with Pull-Down
+					SET_PIN_OUTPUT_PULLDOWN(MCU_LED_GREEN);		// Set MCU_LED_GREEN as Output with Pull-Down
+					SET_PIN_OUTPUT_PULLDOWN(MCU_LED_BLUE);		// Set MCU_LED_BLUE as Output with Pull-Down
+					SET_PIN_OUTPUT_PULLDOWN(HEARTBEAT);			// Set HEARTBEAT as Output with Pull-Down
 
 				}
 
 				// Module 1 Second Timer
-				inline void AVR_Timer(void) {
+				inline void AVR_Timer() {
 
-					// Clear Registers
-					TCCR5A = 0x00;
-					TCCR5B = 0x00;
-
-					// Clear Counter
-					TCNT5 = 0;
+					// Set CTC Mod and Rescale (1024)
+					TCCR5A = 0;
+					TCCR5B = (1 << WGM52) | (1 << CS52) | (1 << CS50);
 
 					// Set Counter Value
-					OCR5A = (F_CPU / (1024)) - 1;
+					OCR5A = (F_CPU / 1024) - 1;
 
-					// Set CTC Mod
-					TCCR5B |= (1 << WGM52);
-
-					// Set Rescale (1024)
-					TCCR5B |= (1 << CS52) | (1 << CS50);
-
-					// Start Timer
+					// Enable Timer Interrupt
 					TIMSK5 |= (1 << OCIE5A);
+
+				}
+
+				// Module INTx Interrupt Function [INT0 or INT1]
+				inline void INTx_Interrupt(uint8_t intNum, bool _State = false, bool _Trigger = false) {
+
+					// Control for State
+					if (_State) {
+
+						// Set INTx
+						EIMSK |= (1 << intNum);
+
+						// Set EICRA or EICRB based on intNum
+						if (intNum <= INT3) {
+							EICRA = (_Trigger) ? (EICRA | (1 << (intNum * 2 + 1)) | (1 << (intNum * 2))) : (EICRA | (1 << (intNum * 2 + 1)) & ~(1 << (intNum * 2)));
+						} else if (intNum <= INT7) {
+							EICRB = (_Trigger) ? (EICRB | (1 << ((intNum - INT4) * 2 + 1)) | (1 << ((intNum - INT4) * 2))) : (EICRB | (1 << ((intNum - INT4) * 2 + 1)) & ~(1 << ((intNum - INT4) * 2)));
+						}
+
+					} else {
+
+						// Clear INTx
+						EIMSK &= ~(1 << intNum);
+
+					}
 
 				}
 
 				// Module PCIEx Mask Function [PCIE0]
 				inline void PCIEx_Mask(bool _PCIE0 = false, bool _PCIE1 = false, bool _PCIE2 = false) {
-
-					// Control for PCIE0
-					if (_PCIE0) {
-
-						// Set PCIE0 Bit on PCICR
-						PCICR |= (1 << PCIE0);
-
-					} else {
-
-						// Clear PCIE0 Bit on PCICR
-						PCICR &= ~(1 << PCIE0);
-
-					}
-
-					// Control for PCIE1
-					if (_PCIE1) {
-
-						// Set PCIE1 Bit on PCICR
-						PCICR |= (1 << PCIE1);
-
-					} else {
-
-						// Clear PCIE1 Bit on PCICR
-						PCICR &= ~(1 << PCIE1);
-
-					}
-
-					// Control for PCIE2
-					if (_PCIE2) {
-
-						// Set PCIE2 Bit on PCICR
-						PCICR |= (1 << PCIE2);
-
-					} else {
-
-						// Clear PCIE2 Bit on PCICR
-						PCICR &= ~(1 << PCIE2);
-
-					}
-
-				}
-
-				// Module INT0 Interrupt Function [INT0]
-				inline void INT0_Interrupt(bool _State = false, bool _Trigger = false) {
-
-					// Control for INT0
-					if (_State) {
-
-						// Set INT0
-						EIMSK |= (1 << INT0);
-
-						// Set EICRA
-						if (_Trigger) {
-
-							// Set INT0 Interrupt rising edge triggered Interrupt
-							EICRA |= (1 << ISC01) | (1 << ISC00);
-
-						} else {
-
-							// Set INT0 Interrupt falling edge triggered Interrupt
-							EICRA |= (1 << ISC01);
-							EICRA &= ~(1 << ISC00);
-
-						}
-
-					} else {
-
-						// Clear INT0
-						EIMSK &= ~(1 << INT0);
-
-					}
-
-				}
-
-				// Module INT1 Interrupt Function [INT1]
-				inline void INT1_Interrupt(bool _State = false, bool _Trigger = false) {
-
-					// Control for INT1
-					if (_State) {
-
-						// Set INT1
-						EIMSK |= (1 << INT1);
-
-						// Set EICRA
-						if (_Trigger) {
-
-							// Set INT1 Interrupt rising edge triggered Interrupt
-							EICRA |= (1 << ISC11) | (1 << ISC10);
-
-						} else {
-
-							// Set INT1 Interrupt falling edge triggered Interrupt
-							EICRA |= (1 << ISC11);
-							EICRA &= ~(1 << ISC10);
-
-						}
-
-					} else {
-
-						// Clear INT1
-						EIMSK &= ~(1 << INT1);
-
-					}
-
-				}
-
-				// Module INT2 Interrupt Function [INT2]
-				inline void INT2_Interrupt(bool _State = false, bool _Trigger = false) {
-
-					// Control for INT2
-					if (_State) {
-
-						// Set INT2
-						EIMSK |= (1 << INT2);
-
-						// Set EICRA
-						if (_Trigger) {
-
-							// Set INT2 Interrupt rising edge triggered Interrupt
-							EICRA |= (1 << ISC21) | (1 << ISC20);
-
-						} else {
-
-							// Set INT2 Interrupt falling edge triggered Interrupt
-							EICRA |= (1 << ISC21);
-							EICRA &= ~(1 << ISC20);
-
-						}
-
-					} else {
-
-						// Clear INT2
-						EIMSK &= ~(1 << INT2);
-
-					}
-
-				}
-
-				// Module INT3 Interrupt Function [INT3]
-				inline void INT3_Interrupt(bool _State = false, bool _Trigger = false) {
-
-					// Control for INT3
-					if (_State) {
-
-						// Set INT3
-						EIMSK |= (1 << INT3);
-
-						// Set EICRA
-						if (_Trigger) {
-
-							// Set INT3 Interrupt rising edge triggered Interrupt
-							EICRA |= (1 << ISC31) | (1 << ISC30);
-
-						} else {
-
-							// Set INT3 Interrupt falling edge triggered Interrupt
-							EICRA |= (1 << ISC31);
-							EICRA &= ~(1 << ISC30);
-
-						}
-
-					} else {
-
-						// Clear INT3
-						EIMSK &= ~(1 << INT3);
-
-					}
-
-				}
-
-				// Module INT4 Interrupt Function [INT4]
-				inline void INT4_Interrupt(bool _State = false, bool _Trigger = false) {
-
-					// Control for INT4
-					if (_State) {
-
-						// Set INT4
-						EIMSK |= (1 << INT4);
-
-						// Set EICRB
-						if (_Trigger) {
-
-							// Set INT4 Interrupt rising edge triggered Interrupt
-							EICRB |= (1 << ISC41) | (1 << ISC40);
-
-						} else {
-
-							// Set INT4 Interrupt falling edge triggered Interrupt
-							EICRB |= (1 << ISC41);
-							EICRB &= ~(1 << ISC40);
-
-						}
-
-					} else {
-
-						// Clear INT4
-						EIMSK &= ~(1 << INT4);
-
-					}
-
-				}
-
-				// Module INT5 Interrupt Function [INT5]
-				inline void INT5_Interrupt(bool _State = false, bool _Trigger = false) {
-
-					// Control for INT5
-					if (_State) {
-
-						// Set INT5
-						EIMSK |= (1 << INT5);
-
-						// Set EICRB
-						if (_Trigger) {
-
-							// Set INT5 Interrupt rising edge triggered Interrupt
-							EICRB |= (1 << ISC51) | (1 << ISC50);
-
-						} else {
-
-							// Set INT5 Interrupt falling edge triggered Interrupt
-							EICRB |= (1 << ISC51);
-							EICRB &= ~(1 << ISC50);
-
-						}
-
-					} else {
-
-						// Clear INT5
-						EIMSK &= ~(1 << INT5);
-
-					}
-
-				}
-
-				// Module INT6 Interrupt Function [INT6]
-				inline void INT6_Interrupt(bool _State = false, bool _Trigger = false) {
-
-					// Control for INT6
-					if (_State) {
-
-						// Set INT6
-						EIMSK |= (1 << INT6);
-
-						// Set EICRB
-						if (_Trigger) {
-
-							// Set INT6 Interrupt rising edge triggered Interrupt
-							EICRB |= (1 << ISC61) | (1 << ISC60);
-
-						} else {
-
-							// Set INT6 Interrupt falling edge triggered Interrupt
-							EICRB |= (1 << ISC61);
-							EICRB &= ~(1 << ISC60);
-
-						}
-
-					} else {
-
-						// Clear INT6
-						EIMSK &= ~(1 << INT6);
-
-					}
-
-				}
-
-				// Module INT7 Interrupt Function [INT7]
-				inline void INT7_Interrupt(bool _State = false, bool _Trigger = false) {
-
-					// Control for INT7
-					if (_State) {
-
-						// Set INT7
-						EIMSK |= (1 << INT7);
-
-						// Set EICRB
-						if (_Trigger) {
-
-							// Set INT7 Interrupt rising edge triggered Interrupt
-							EICRB |= (1 << ISC71) | (1 << ISC70);
-
-						} else {
-
-							// Set INT7 Interrupt falling edge triggered Interrupt
-							EICRB |= (1 << ISC71);
-							EICRB &= ~(1 << ISC70);
-
-						}
-
-					} else {
-
-						// Clear INT7
-						EIMSK &= ~(1 << INT7);
-
-					}
+					
+					// Define PCICR Mask
+					uint8_t _PCICR_Mask = 0x00;
+
+					// Set PCICR Mask
+					if (_PCIE0) _PCICR_Mask |= (1 << PCIE0);	// Set PCIE0
+					if (_PCIE1) _PCICR_Mask |= (1 << PCIE1);	// Set PCIE1
+					if (_PCIE2) _PCICR_Mask |= (1 << PCIE2);	// Set PCIE2
+
+					// Set PCICR with the calculated mask
+					PCICR = _PCICR_Mask;
 
 				}
 
 				// PCINTxx Interrupt Function
 				inline void PCINTxx_Interrupt(uint8_t _PCINT, bool _Status = false) {
 
-					// Control for PCINT
-					if (_PCINT >= 0 and _PCINT <= 7) {
+					// Set PCINTxx Interrupt
+					if (_PCINT >= 0 && _PCINT <= 7) {
 
 						// Control for Status
 						if (_Status) {
-
-							// Set PCINT0 Bit on PCMSK0
+							
+							// Set PCINTxx [0 - 7]
 							PCMSK0 |= (1 << _PCINT);
 
 						} else {
 
-							// Clear PCINT0 Bit on PCMSK0
+							// Clear PCINTxx [0 - 7]
 							PCMSK0 &= ~(1 << _PCINT);
 
 						}
 
-					} else if (_PCINT >= 8 and _PCINT <= 15) {
-
+					} else if (_PCINT >= 8 && _PCINT <= 15) {
+						
 						// Control for Status
 						if (_Status) {
-
-							// Set PCINT0 Bit on PCMSK0
+							
+							// Set PCINTxx [8 - 15]
 							PCMSK1 |= (1 << (_PCINT - 8));
-
+						
 						} else {
-
-							// Clear PCINT0 Bit on PCMSK0
+						
+							// Clear PCINTxx [8 - 15]
 							PCMSK1 &= ~(1 << (_PCINT - 8));
-
+						
 						}
-
-					} else if (_PCINT >= 16 and _PCINT <= 23) {
-
+					
+					} else if (_PCINT >= 16 && _PCINT <= 23) {
+						
 						// Control for Status
 						if (_Status) {
-
-							// Set PCINT0 Bit on PCMSK0
+							
+							// Set PCINTxx [16 - 23]
 							PCMSK2 |= (1 << (_PCINT - 16));
-
+						
 						} else {
-
-							// Clear PCINT0 Bit on PCMSK0
+						
+							// Clear PCINTxx [16 - 23]
 							PCMSK2 &= ~(1 << (_PCINT - 16));
-
+						
 						}
-
+					
 					}
-
+				
 				}
 
 			// Public Context
@@ -557,6 +188,9 @@
 
 				// Define Interrupt Variables Structure
 				struct Interrupt_Struct {
+
+					// Define GSM MONI Interval
+					uint32_t Timer = 0;
 
 					// Define Interrupt Mask Structure
 					struct Interrupt_Mask_Structure {
@@ -610,6 +244,9 @@
 						// Define RTC Interrupt
 						bool RTC = false;
 
+						// Define GSM Monitor Interrupt
+						bool MONI = false;
+
 					} Status;
 
 				};
@@ -641,17 +278,7 @@
 				void Begin(void) {
 
 					// Control for Terminal Sense
-					if (bitRead(PIN_REGISTER_TERMINAL_SENSE, PIN_TERMINAL_SENSE)) {
-
-						// Set Terminal Sense Variable	
-						this->Hardware_Terminal.Sense = false;
-						
-					} else {
-						
-						// Set Terminal Sense Variable
-						this->Hardware_Terminal.Sense = true;
-						
-					}
+					this->Hardware_Terminal.Sense = !bitRead(PIN_REGISTER_TERMINAL_SENSE, PIN_TERMINAL_SENSE);
 
 					// Disable Interrupts
 					cli();
@@ -660,55 +287,13 @@
 					this->AVR_Timer();
 
 					// Set INT4 as falling edge triggered Interrupt
-					this->INT4_Interrupt(true, false);
+					this->INTx_Interrupt(INT4, true, false);
 
 					// Set PCINTxx Mask Register
 					this->PCIEx_Mask(true, true, true);
 
-					// Set PCINT4 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT4, true);
-
-					// Set PCINT5 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT5, true);
-
-					// Set PCINT6 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT6, true);
-
-					// Set PCINT7 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT7, true);
-
-					// Set PCINT11 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT11, true);
-
-					// Set PCINT12 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT12, true);
-
-					// Set PCINT13 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT13, true);
-
-					// Set PCINT16 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT16, true);
-
-					// Set PCINT17 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT17, true);
-
-					// Set PCINT18 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT18, true);
-
-					// Set PCINT19 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT19, true);
-
-					// Set PCINT20 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT20, true);
-
-					// Set PCINT21 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT21, true);
-
-					// Set PCINT22 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT22, true);
-
-					// Set PCINT23 Interrupt
-					this->PCINTxx_Interrupt(INTERRUPT_PCINT23, true);
+					// Set PCINT4-23 Interrupts
+					for (uint8_t i = INTERRUPT_PCINT4; i <= INTERRUPT_PCINT23; i++) this->PCINTxx_Interrupt(i, true);
 
 					// Read Boot Default Interrupt Status
 					this->Hardware_Interrupt.Mask.PCINT4_State = bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1);
@@ -717,7 +302,7 @@
 					this->Hardware_Interrupt.Mask.PCINT7_State = bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC);
 
 					// Set Interrupt Updater
-					this->Hardware_Interrupt.Status.Energy = this->Hardware_Interrupt.Mask.PCINT4_State and this->Hardware_Interrupt.Mask.PCINT5_State;
+					this->Hardware_Interrupt.Status.Energy = this->Hardware_Interrupt.Mask.PCINT4_State && this->Hardware_Interrupt.Mask.PCINT5_State;
 					this->Hardware_Interrupt.Status.Environment = this->Hardware_Interrupt.Mask.PCINT6_State;
 					this->Hardware_Interrupt.Status.RTC = this->Hardware_Interrupt.Mask.PCINT7_State;
 
@@ -870,13 +455,17 @@
 				// Timer Interrupt Function
 				static void TIMER5_Handler(void) {
 
-					// Set UpTime Display Interrupt
+					// Increase Timer
+					Hardware_Interrupt.Timer++;
+
+					// Handle MONI Interrupt every 300th Timer tick
+					if (Hardware_Interrupt.Timer % 300 == 0) {
+						Hardware_Interrupt.Status.MONI = true;
+					}
+
+					// Set Display Interrupts
 					Hardware_Interrupt.Display.Uptime = true;
-
-					// Set Environment Display Interrupt
 					Hardware_Interrupt.Display.Environment = true;
-
-					// Set Battery Display Interrupt
 					Hardware_Interrupt.Display.Battery = true;
 
 				}
@@ -892,55 +481,39 @@
 				// PCMSK0 Mask Handler Function
 				static void PCMSK0_Handler(void) {
 
-					// Control for Energy Interrupt
-					if (Hardware_Interrupt.Mask.PCINT4_State != INT_ENERGY_1) {
+					// Define Interrupt Variables
+					bool _Energy_Interrupt = false;
+					bool _Environment_Interrupt = false;
+					bool _RTC_Interrupt = false;
 
-						// Set Interrupt
-						Hardware_Interrupt.Status.Energy = true;
-
-						// Set Interrupt Buffer
-						Hardware_Interrupt.Mask.PCINT4_State = INT_ENERGY_1;
-
-					}
-					if (Hardware_Interrupt.Mask.PCINT5_State != INT_ENERGY_2) {
-
-						// Set Interrupt
-						Hardware_Interrupt.Status.Energy = true;
-
-						// Set Interrupt Buffer
-						Hardware_Interrupt.Mask.PCINT5_State = INT_ENERGY_2;
-
+					// Control for ENERGY Interrupt
+					if (Hardware_Interrupt.Mask.PCINT4_State != CONTROL_ENERGY_1) {
+						Hardware_Interrupt.Mask.PCINT4_State = CONTROL_ENERGY_1;
+						_Energy_Interrupt = true;
 					}
 
-					// Control for Environment Interrupt
-					if (Hardware_Interrupt.Mask.PCINT6_State != INT_ENVIRONMENT) {
+					// Control for ENERGY Interrupt
+					if (Hardware_Interrupt.Mask.PCINT5_State != CONTROL_ENERGY_2) {
+						Hardware_Interrupt.Mask.PCINT5_State = CONTROL_ENERGY_2;
+						_Energy_Interrupt = true;
+					}
 
-						// Set Interrupt
-						Hardware_Interrupt.Status.Environment = true;
-
-						// Set Interrupt Buffer
-						Hardware_Interrupt.Mask.PCINT6_State = INT_ENVIRONMENT;
-
-					
+					// Control for ENVIRONMENT Interrupt
+					if (Hardware_Interrupt.Mask.PCINT6_State != CONTROL_ENVIRONMENT) {
+						Hardware_Interrupt.Mask.PCINT6_State = CONTROL_ENVIRONMENT;
+						_Environment_Interrupt = true;
 					}
 
 					// Control for RTC Interrupt
-					if (Hardware_Interrupt.Mask.PCINT7_State != INT_RTC) {
-
-						// Set Interrupt
-						Hardware_Interrupt.Status.RTC = true;
-
-						// Set Interrupt Buffer
-						Hardware_Interrupt.Mask.PCINT7_State = INT_RTC;
-
+					if (Hardware_Interrupt.Mask.PCINT7_State != CONTROL_RTC) {
+						Hardware_Interrupt.Mask.PCINT7_State = CONTROL_RTC;
+						_RTC_Interrupt = true;
 					}
 
-				}
-
-				// PCMSK1 Mask Handler Function
-				static void PCMSK1_Handler(void) {
-
-
+					// Set Interrupt Updater
+					Hardware_Interrupt.Status.Energy = _Energy_Interrupt;
+					Hardware_Interrupt.Status.Environment = _Environment_Interrupt;
+					Hardware_Interrupt.Status.RTC = _RTC_Interrupt;
 
 				}
 
@@ -974,7 +547,7 @@
 
 		}
 
-		// Interrupt Routine PCMSK0
+		// Interrupt Routine PCMSK0 [PCINT0 - PCINT7]
 		ISR(PCINT0_vect, ISR_NOBLOCK) {
 
 			// PCMSK0 Handler
@@ -982,15 +555,7 @@
 
 		}
 
-		// Interrupt Routine PCMSK1
-		ISR(PCINT1_vect, ISR_NOBLOCK) {
-
-			// PCMSK1 Handler
-			Hardware::PCMSK1_Handler();
-
-		}
-
-		// Interrupt Routine PCMSK2
+		// Interrupt Routine PCMSK2 [PCINT16 - PCINT23]
 		ISR(PCINT2_vect, ISR_NOBLOCK) {	
 
 			// PCMSK2 Handler

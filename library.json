@@ -1,8 +1,8 @@
 {
 	"name": "Hardware",
-	"version": "2.1.1",
-	"keywords": "AVR, Functions, Atmel, STF, Modules, B107, B108",
-	"description": "Hardware definitions of self made modules for AVR microcontrollers.",
+	"version": "2.2.0",
+	"keywords": "AVR, Functions, Atmel, STF, Modules, B107AA, B108AA, B152BA, B153AA",
+    "description": "Advanced hardware modules for AVR microcontrollers, optimized for IoT applications in smart agriculture. Includes sensor integration and power management features.",
 	"authors": [
 		{
 			"name": "Mehmet Gunce Akkoyun",
@@ -25,5 +25,17 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/akkoyun/Hardware.git"
-	}
+	},
+    "documentation": {
+        "type": "wiki",
+        "url": "https://github.com/akkoyun/Hardware/wiki"
+    },
+    "community": {
+        "forum": "https://community.platformio.org/",
+        "issues": "https://github.com/akkoyun/Hardware/issues"
+    },
+    "changelog": "CHANGELOG.md",
+    "support": {
+        "email": "akkoyun@me.com"
+    }
 }

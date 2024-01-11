@@ -38,10 +38,10 @@
 #define PIN_INT_RTC					PB7
 
 // 3V8_EN Pin Definition
-#define DDR_3V8_EN					DDRE
-#define PORT_3V8_EN					PORTE
-#define PIN_REGISTER_3V8_EN			PINE
-#define PIN_3V8_EN					PE2
+#define DDR_EN_3V8					DDRE
+#define PORT_EN_3V8					PORTE
+#define PIN_EN_REGISTER_3V8			PINE
+#define PIN_EN_3V8					PE2
 
 // RS485_DIR Pin Definition
 #define DDR_RS485_DIR				DDRE
@@ -68,10 +68,10 @@
 #define PIN_INT_GAUGE				PE6
 
 // 3V3_BUZZER Pin Definition
-#define DDR_3V3_BUZZER				DDRE
-#define PORT_3V3_BUZZER				PORTE
-#define PIN_REGISTER_3V3_BUZZER		PINE
-#define PIN_3V3_BUZZER				PE7
+#define DDR_BUZZER				    DDRE
+#define PORT_BUZZER				    PORTE
+#define PIN_REGISTER_BUZZER		    PINE
+#define PIN_BUZZER				    PE7
 
 // LCD_SENSE Pin Definition
 #define DDR_LCD_SENSE				DDRH
@@ -139,53 +139,53 @@
 #define PIN_REGISTER_GSM_SDOWN		PINJ
 #define PIN_GSM_SDOWN				PJ7
 
-// 3V3_Sense_1 Pin Definition
-#define DDR_3V3_Sense_1				DDRK
-#define PORT_3V3_Sense_1			PORTK
-#define PIN_REGISTER_3V3_Sense_1	PINK
-#define PIN_3V3_Sense_1				PK0
+// SENSE_1 Pin Definition
+#define DDR_SENSE_1 				DDRK
+#define PORT_SENSE_1    			PORTK
+#define PIN_REGISTER_SENSE_1    	PINK
+#define PIN_SENSE_1			    	PK0
 
-// 3V3_Sense_2 Pin Definition
-#define DDR_3V3_Sense_2				DDRK
-#define PORT_3V3_Sense_2			PORTK
-#define PIN_REGISTER_3V3_Sense_2	PINK
-#define PIN_3V3_Sense_2				PK1
+// SENSE_2 Pin Definition
+#define DDR_SENSE_2 				DDRK
+#define PORT_SENSE_2    			PORTK
+#define PIN_REGISTER_SENSE_2    	PINK
+#define PIN_SENSE_2			    	PK1
 
-// 3V3_Sense_3 Pin Definition
-#define DDR_3V3_Sense_3				DDRK
-#define PORT_3V3_Sense_3			PORTK
-#define PIN_REGISTER_3V3_Sense_3	PINK
-#define PIN_3V3_Sense_3				PK2
+// SENSE_3 Pin Definition
+#define DDR_SENSE_3			    	DDRK
+#define PORT_SENSE_3		    	PORTK
+#define PIN_REGISTER_SENSE_3    	PINK
+#define PIN_SENSE_3			    	PK2
 
-// 3V3_Sense_4 Pin Definition
-#define DDR_3V3_Sense_4				DDRK
-#define PORT_3V3_Sense_4			PORTK
-#define PIN_REGISTER_3V3_Sense_4	PINK
-#define PIN_3V3_Sense_4				PK3
+// SENSE_4 Pin Definition
+#define DDR_SENSE_4			    	DDRK
+#define PORT_SENSE_4		    	PORTK
+#define PIN_REGISTER_SENSE_4    	PINK
+#define PIN_SENSE_4			    	PK3
 
-// 3V3_Sense_5 Pin Definition
-#define DDR_3V3_Sense_5				DDRK
-#define PORT_3V3_Sense_5			PORTK
-#define PIN_REGISTER_3V3_Sense_5	PINK
-#define PIN_3V3_Sense_5				PK4
+// SENSE_5 Pin Definition
+#define DDR_SENSE_5			    	DDRK
+#define PORT_SENSE_5		    	PORTK
+#define PIN_REGISTER_SENSE_5    	PINK
+#define PIN_SENSE_5			    	PK4
 
-// 3V3_Sense_6 Pin Definition
-#define DDR_3V3_Sense_6				DDRK
-#define PORT_3V3_Sense_6			PORTK
-#define PIN_REGISTER_3V3_Sense_6	PINK
-#define PIN_3V3_Sense_6				PK5
+// SENSE_6 Pin Definition
+#define DDR_SENSE_6			    	DDRK
+#define PORT_SENSE_6		    	PORTK
+#define PIN_REGISTER_SENSE_6    	PINK
+#define PIN_SENSE_6			    	PK5
 
-// 3V3_Sense_7 Pin Definition
-#define DDR_3V3_Sense_7				DDRK
-#define PORT_3V3_Sense_7			PORTK
-#define PIN_REGISTER_3V3_Sense_7	PINK
-#define PIN_3V3_Sense_7				PK6
+// SENSE_7 Pin Definition
+#define DDR_SENSE_7			    	DDRK
+#define PORT_SENSE_7		    	PORTK
+#define PIN_REGISTER_SENSE_7	    PINK
+#define PIN_SENSE_7			    	PK6
 
-// 3V3_Sense_8 Pin Definition
-#define DDR_3V3_Sense_8				DDRK
-#define PORT_3V3_Sense_8			PORTK
-#define PIN_REGISTER_3V3_Sense_8	PINK
-#define PIN_3V3_Sense_8				PK7
+// SENSE_8 Pin Definition
+#define DDR_SENSE_8				    DDRK
+#define PORT_SENSE_8		    	PORTK
+#define PIN_REGISTER_SENSE_8    	PINK
+#define PIN_SENSE_8				    PK7
 
 // MCU_LED_RED Pin Definition
 #define DDR_MCU_LED_RED				DDRL
@@ -215,24 +215,24 @@
 // -----------------------------
 
 // Define Terminal Sense Macro
-#define TERMINAL_SENSE (((PIN_REGISTER_TERMINAL_SENSE) >> (PIN_TERMINAL_SENSE)) & 0x01)
+#define CONTROL_TERMINAL (((PIN_REGISTER_TERMINAL_SENSE) >> (PIN_TERMINAL_SENSE)) & 0x01)
 
 // Define Input Port Macros
-#define SENSE_PHASE_R (((PIN_REGISTER_3V3_Sense_1) >> (PIN_3V3_Sense_1)) & 0x01)
-#define SENSE_PHASE_S (((PIN_REGISTER_3V3_Sense_2) >> (PIN_3V3_Sense_2)) & 0x01)
-#define SENSE_PHASE_T (((PIN_REGISTER_3V3_Sense_3) >> (PIN_3V3_Sense_3)) & 0x01)
-#define SENSE_M1 (((PIN_REGISTER_3V3_Sense_4) >> (PIN_3V3_Sense_4)) & 0x01)
-#define SENSE_M2 (((PIN_REGISTER_3V3_Sense_5) >> (PIN_3V3_Sense_5)) & 0x01)
-#define SENSE_M3 (((PIN_REGISTER_3V3_Sense_6) >> (PIN_3V3_Sense_6)) & 0x01)
-#define SENSE_TH (((PIN_REGISTER_3V3_Sense_7) >> (PIN_3V3_Sense_7)) & 0x01)
-#define SENSE_MP (((PIN_REGISTER_3V3_Sense_8) >> (PIN_3V3_Sense_8)) & 0x01)
+#define CONTROL_PHASE_R (((PIN_REGISTER_3V3_Sense_1) >> (PIN_3V3_Sense_1)) & 0x01)
+#define CONTROL_PHASE_S (((PIN_REGISTER_3V3_Sense_2) >> (PIN_3V3_Sense_2)) & 0x01)
+#define CONTROL_PHASE_T (((PIN_REGISTER_3V3_Sense_3) >> (PIN_3V3_Sense_3)) & 0x01)
+#define CONTROL_M1 (((PIN_REGISTER_3V3_Sense_4) >> (PIN_3V3_Sense_4)) & 0x01)
+#define CONTROL_M2 (((PIN_REGISTER_3V3_Sense_5) >> (PIN_3V3_Sense_5)) & 0x01)
+#define CONTROL_M3 (((PIN_REGISTER_3V3_Sense_6) >> (PIN_3V3_Sense_6)) & 0x01)
+#define CONTROL_TH (((PIN_REGISTER_3V3_Sense_7) >> (PIN_3V3_Sense_7)) & 0x01)
+#define CONTROL_MP (((PIN_REGISTER_3V3_Sense_8) >> (PIN_3V3_Sense_8)) & 0x01)
 
 // Define Interrupt Port Macros
-#define INT_ENERGY_1 (((PIN_REGISTER_INT_ENERGY_1) >> (PIN_INT_ENERGY_1)) & 0x01)	// PCINT4
-#define INT_ENERGY_2 (((PIN_REGISTER_INT_ENERGY_2) >> (PIN_INT_ENERGY_2)) & 0x01)	// PCINT5
-#define INT_ENVIRONMENT (((PIN_REGISTER_INT_ENV) >> (PIN_INT_ENV)) & 0x01)			// PCINT6
-#define INT_RTC (((PIN_REGISTER_INT_RTC) >> (PIN_INT_RTC)) & 0x01)					// PCINT7
-#define INT_RS485 (((PIN_REGISTER_INT_RS485) >> (PIN_INT_RS485)) & 0x01)
-#define INT_GSM_RING (((PIN_REGISTER_GSM_RING) >> (PIN_GSM_RING)) & 0x01)			// PCINT11
-#define INT_GSM_PMON (((PIN_REGISTER_GSM_PMON) >> (PIN_GSM_PMON)) & 0x01)			// PCINT12
-#define INT_GSM_SWREADY (((PIN_REGISTER_GSM_SWREADY) >> (PIN_GSM_SWREADY)) & 0x01)	// PCINT13
+#define CONTROL_ENERGY_1 (((PIN_REGISTER_INT_ENERGY_1) >> (PIN_INT_ENERGY_1)) & 0x01)	// PCINT4
+#define CONTROL_ENERGY_2 (((PIN_REGISTER_INT_ENERGY_2) >> (PIN_INT_ENERGY_2)) & 0x01)	// PCINT5
+#define CONTROL_ENVIRONMENT (((PIN_REGISTER_INT_ENV) >> (PIN_INT_ENV)) & 0x01)			// PCINT6
+#define CONTROL_RTC (((PIN_REGISTER_INT_RTC) >> (PIN_INT_RTC)) & 0x01)					// PCINT7
+#define CONTROL_RS485 (((PIN_REGISTER_INT_RS485) >> (PIN_INT_RS485)) & 0x01)
+#define CONTROL_GSM_RING (((PIN_REGISTER_GSM_RING) >> (PIN_GSM_RING)) & 0x01)			// PCINT11
+#define CONTROL_GSM_PMON (((PIN_REGISTER_GSM_PMON) >> (PIN_GSM_PMON)) & 0x01)			// PCINT12
+#define CONTROL_GSM_SWREADY (((PIN_REGISTER_GSM_SWREADY) >> (PIN_GSM_SWREADY)) & 0x01)	// PCINT13
