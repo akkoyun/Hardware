@@ -10,3 +10,7 @@
 ## 2.2.1 (2024-01-11)
 
 * Control macro bug fixed.
+
+## 2.2.2 (2024-01-11)
+
+* Bug fix on INTx_Interrupt function.

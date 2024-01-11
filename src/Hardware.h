@@ -100,9 +100,9 @@
 
 						// Set EICRA or EICRB based on intNum
 						if (intNum <= INT3) {
-							EICRA = (_Trigger) ? (EICRA | (1 << (intNum * 2 + 1)) | (1 << (intNum * 2))) : (EICRA | (1 << (intNum * 2 + 1)) & ~(1 << (intNum * 2)));
+							EICRA = (_Trigger) ? (EICRA | (1 << (intNum * 2 + 1)) | (1 << (intNum * 2))) : (EICRA | ((1 << (intNum * 2 + 1)) & ~(1 << (intNum * 2))));
 						} else if (intNum <= INT7) {
-							EICRB = (_Trigger) ? (EICRB | (1 << ((intNum - INT4) * 2 + 1)) | (1 << ((intNum - INT4) * 2))) : (EICRB | (1 << ((intNum - INT4) * 2 + 1)) & ~(1 << ((intNum - INT4) * 2)));
+							EICRB = (_Trigger) ? (EICRB | (1 << ((intNum - INT4) * 2 + 1)) | (1 << ((intNum - INT4) * 2))) : (EICRB | ((1 << ((intNum - INT4) * 2 + 1)) & ~(1 << ((intNum - INT4) * 2))));
 						}
 
 					} else {
