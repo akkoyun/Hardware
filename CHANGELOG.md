@@ -14,3 +14,7 @@
 ## 2.2.2 (2024-01-11)
 
 * Bug fix on INTx_Interrupt function.
+
+## 2.2.3 (2024-01-11)
+
+* GSM_COMM_EN defination bug fixed.
