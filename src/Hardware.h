@@ -26,8 +26,25 @@
 		// Get Module PinOut
 		#include "Pinout/B107AA.h"
 
+		// Include Libraries
+		#ifndef __RV3028__
+			#include <RV3028.h>
+		#endif
+		#ifndef __DS28C__
+			#include <DS28C.h>
+		#endif
+		#ifndef __Environment__
+			#include <Environment.h>
+		#endif
+		#ifndef __MAX17055__
+			#include <MAX17055.h>
+		#endif
+		#ifndef __BQ24298__
+			#include <BQ24298.h>
+		#endif
+
 		// Hardware Class
-		class Hardware {
+		class Hardware : public RV3028, public DS28C, public HDC2010, public MAX17055, public BQ24298 {
 
 			// Private Context
 			private:
@@ -116,7 +133,7 @@
 
 				// Module PCIEx Mask Function [PCIE0]
 				inline void PCIEx_Mask(bool _PCIE0 = false, bool _PCIE1 = false, bool _PCIE2 = false) {
-					
+
 					// Define PCICR Mask
 					uint8_t _PCICR_Mask = 0x00;
 
@@ -138,7 +155,7 @@
 
 						// Control for Status
 						if (_Status) {
-							
+
 							// Set PCINTxx [0 - 7]
 							PCMSK0 |= (1 << _PCINT);
 
@@ -150,47 +167,72 @@
 						}
 
 					} else if (_PCINT >= 8 && _PCINT <= 15) {
-						
+
 						// Control for Status
 						if (_Status) {
-							
+
 							// Set PCINTxx [8 - 15]
 							PCMSK1 |= (1 << (_PCINT - 8));
-						
+
 						} else {
-						
+
 							// Clear PCINTxx [8 - 15]
 							PCMSK1 &= ~(1 << (_PCINT - 8));
-						
+
 						}
-					
+
 					} else if (_PCINT >= 16 && _PCINT <= 23) {
-						
+
 						// Control for Status
 						if (_Status) {
-							
+
 							// Set PCINTxx [16 - 23]
 							PCMSK2 |= (1 << (_PCINT - 16));
-						
+
 						} else {
-						
+
 							// Clear PCINTxx [16 - 23]
 							PCMSK2 &= ~(1 << (_PCINT - 16));
-						
+
 						}
-					
+
 					}
-				
+
 				}
 
 			// Public Context
 			public:
 
-				// Define Interrupt Variables Structure
-				struct Interrupt_Struct {
+				// Define Register Structure
+				struct B107AA_Register_Struct {
 
-					// Define GSM MONI Interval
-					uint32_t Timer = 0;
+					// Status Register
+					uint32_t Status = 0x00000000;
+
+					// Buffer Register
+					uint32_t Buffer = 0x00000000;
+
+					// Publish Register
+					uint32_t Publish = 0x00000000;
+
+					// Stop Register
+					uint32_t Stop = 0x00000000;
+
+				};
+
+				// Define Time Variables Structure
+				struct B107AA_Time_Struct {
+
+					// Define Loop Timer
+					uint32_t Last_Loop_Time = 0;
+
+					// Define Loop Time
+					uint16_t Loop_Time = 0;
+
+				};
+
+				// Define Interrupt Variables Structure
+				struct B107AA_Interrupt_Struct {
 
 					// Define Interrupt Mask Structure
 					struct Interrupt_Mask_Structure {
@@ -207,27 +249,19 @@
 						// PCINT7 Buffer
 						bool PCINT7_State = false;
 
+						// PCINT11 Buffer
+						bool PCINT11_State = false;
+
+						// PCINT12 Buffer
+						bool PCINT12_State = false;
+
 					} Mask;
-
-					// Define Terminal Display Interrupt Structure
-					struct Terminal_Display_Struct {
-
-						// Status Display Interrupt
-						bool Status = false;
-
-						// Uptime Display Interrupt
-						bool Uptime = false;
-
-						// Environment Display Interrupt
-						bool Environment = false;
-
-						// Battery Display Interrupt
-						bool Battery = false;
-
-					} Display;
 
 					// Define Interrupt Status Structure
 					struct Interrupt_Status_Structure {
+
+						// Define Display Interrupt
+						bool Display = false;
 
 						// Define Input Interrupt
 						bool Input = false;
@@ -244,15 +278,23 @@
 						// Define RTC Interrupt
 						bool RTC = false;
 
-						// Define GSM Monitor Interrupt
-						bool MONI = false;
+						// Define GSM Interrupt Structure
+						struct B107AA_GSM_Interrupt_Structure {
+
+							// Define GSM Ring Interrupt
+							bool Ring = false;
+
+							// Define GSM Power Monitor Interrupt
+							bool Power_Monitor = false;
+
+						} GSM;
 
 					} Status;
 
 				};
 
 				// Define Terminal Variables Structure
-				struct Terminal_Struct {
+				struct B107AA_Terminal_Struct {
 
 					// Terminal Variables
 					bool Sense = false;
@@ -263,11 +305,13 @@
 				};
 
 				// Define Interrupt Variables
-				static Interrupt_Struct Hardware_Interrupt;
-				static Terminal_Struct Hardware_Terminal;
+				B107AA_Time_Struct B107AA_Time;
+				B107AA_Terminal_Struct B107AA_Terminal;
+				B107AA_Register_Struct B107AA_Register;
+				static B107AA_Interrupt_Struct B107AA_Interrupt;
 
 				// Module Constructor
-				Hardware(void) {
+				Hardware(void) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298() {
 
 					// Set Pin Out
 					this->Set_PinOut();
@@ -278,7 +322,7 @@
 				void Begin(void) {
 
 					// Control for Terminal Sense
-					this->Hardware_Terminal.Sense = !bitRead(PIN_REGISTER_TERMINAL_SENSE, PIN_TERMINAL_SENSE);
+					this->B107AA_Terminal.Sense = !CONTROL_TERMINAL;
 
 					// Disable Interrupts
 					cli();
@@ -295,19 +339,47 @@
 					// Set PCINT4-23 Interrupts
 					for (uint8_t i = INTERRUPT_PCINT4; i <= INTERRUPT_PCINT23; i++) this->PCINTxx_Interrupt(i, true);
 
+					// Get Serial ID
+					DS28C::Begin();
+
+					// Start RTC
+					RV3028::Begin();
+
+					// Start TH Sensor
+					HDC2010::Begin();
+
+					// Start Battery Gauge
+					MAX17055::Begin();
+
+					// Start Charger
+					BQ24298::Begin();
+
+					// Start Serial Communication
+					SERIAL_TERMINAL.begin(115200);
+					SERIAL_ENERGY.begin(38400);
+					SERIAL_GSM.begin(115200);
+
+					// Read Register from EEPROM
+					this->Read_Publish_Register();
+					this->Read_Stop_Register();
+
 					// Read Boot Default Interrupt Status
-					this->Hardware_Interrupt.Mask.PCINT4_State = bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1);
-					this->Hardware_Interrupt.Mask.PCINT5_State = bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2);
-					this->Hardware_Interrupt.Mask.PCINT6_State = bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV);
-					this->Hardware_Interrupt.Mask.PCINT7_State = bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC);
+					this->B107AA_Interrupt.Mask.PCINT4_State = CONTROL_ENERGY_1;
+					this->B107AA_Interrupt.Mask.PCINT5_State = CONTROL_ENERGY_2;
+					this->B107AA_Interrupt.Mask.PCINT6_State = CONTROL_ENVIRONMENT;
+					this->B107AA_Interrupt.Mask.PCINT7_State = CONTROL_RTC;
+					this->B107AA_Interrupt.Mask.PCINT11_State = CONTROL_GSM_RING;
+					this->B107AA_Interrupt.Mask.PCINT12_State = CONTROL_GSM_PMON;
 
 					// Set Interrupt Updater
-					this->Hardware_Interrupt.Status.Energy = this->Hardware_Interrupt.Mask.PCINT4_State && this->Hardware_Interrupt.Mask.PCINT5_State;
-					this->Hardware_Interrupt.Status.Environment = this->Hardware_Interrupt.Mask.PCINT6_State;
-					this->Hardware_Interrupt.Status.RTC = this->Hardware_Interrupt.Mask.PCINT7_State;
+					this->B107AA_Interrupt.Status.Energy = this->B107AA_Interrupt.Mask.PCINT4_State && this->B107AA_Interrupt.Mask.PCINT5_State;
+					this->B107AA_Interrupt.Status.Environment = this->B107AA_Interrupt.Mask.PCINT6_State;
+					this->B107AA_Interrupt.Status.RTC = this->B107AA_Interrupt.Mask.PCINT7_State;
+					this->B107AA_Interrupt.Status.GSM.Ring = this->B107AA_Interrupt.Mask.PCINT11_State;
+					this->B107AA_Interrupt.Status.GSM.Power_Monitor = this->B107AA_Interrupt.Mask.PCINT12_State;
 
-					// Start Interrupts
-					sei();
+					// Set Last Loop Time
+					this->B107AA_Time.Last_Loop_Time = millis();
 
 				}
 
@@ -438,6 +510,130 @@
 
 				}
 
+				// Terminal Display Controller
+				void Terminal_Control(void) {
+
+					// Control for Terminal Sense
+					#if defined(_DEBUG_)
+
+						// Set Terminal Sense Variable	
+						if (CONTROL_TERMINAL) {
+
+							// Set Terminal Sense Variable
+							this->B107AA_Terminal.Sense = false;
+
+							// End Serial Stream
+							if (this->B107AA_Terminal.Start) Serial.end();
+
+							// Set Terminal Variable
+							this->B107AA_Terminal.Start = false;
+
+						} else {
+
+							// Set Terminal Sense Variable
+							this->B107AA_Terminal.Sense = true;
+
+							// Start Serial Stream
+							if (!this->B107AA_Terminal.Start) {
+
+								// Set Terminal Start
+								Serial.begin(115200);
+
+								// Set Terminal Variable
+								this->B107AA_Terminal.Start = true;
+
+							}
+
+						}
+
+					#endif
+
+				}
+
+				// Read PUBLISH Register from EEPROM Function
+				void Read_Publish_Register(void) {
+
+					// Declare Variables
+					uint8_t _Publish_Register_MSB_2;
+					uint8_t _Publish_Register_MSB_1;
+					uint8_t _Publish_Register_LSB_2;
+					uint8_t _Publish_Register_LSB_1;
+
+					// Read EEPROM
+					RV3028::EEPROM(READ, __EEPROM_PUBLISH_MASK_MSB_2__, _Publish_Register_MSB_2);
+					RV3028::EEPROM(READ, __EEPROM_PUBLISH_MASK_MSB_1__, _Publish_Register_MSB_1);
+					RV3028::EEPROM(READ, __EEPROM_PUBLISH_MASK_LSB_2__, _Publish_Register_LSB_2);
+					RV3028::EEPROM(READ, __EEPROM_PUBLISH_MASK_LSB_1__, _Publish_Register_LSB_1);
+
+					// Control for EEPROM
+					if (_Publish_Register_MSB_2 == 0x00 && _Publish_Register_MSB_1 == 0x00 && _Publish_Register_LSB_2 == 0x00 && _Publish_Register_LSB_1 == 0x00) {
+
+						// Define Default Values
+						uint8_t _Publish_Register_Default_MSB_2 = ((__PUBLISH_REGISTER_DEFAULT__ >> 24) & 0xFF);
+						uint8_t _Publish_Register_Default_MSB_1 = ((__PUBLISH_REGISTER_DEFAULT__ >> 16) & 0xFF);
+						uint8_t _Publish_Register_Default_LSB_2 = ((__PUBLISH_REGISTER_DEFAULT__ >> 8) & 0xFF);
+						uint8_t _Publish_Register_Default_LSB_1 = ((__PUBLISH_REGISTER_DEFAULT__ >> 0) & 0xFF);
+
+						// Set Default Value
+						RV3028::EEPROM(WRITE, __EEPROM_PUBLISH_MASK_MSB_2__, _Publish_Register_Default_MSB_2);
+						RV3028::EEPROM(WRITE, __EEPROM_PUBLISH_MASK_MSB_1__, _Publish_Register_Default_MSB_1);
+						RV3028::EEPROM(WRITE, __EEPROM_PUBLISH_MASK_LSB_2__, _Publish_Register_Default_LSB_2);
+						RV3028::EEPROM(WRITE, __EEPROM_PUBLISH_MASK_LSB_1__, _Publish_Register_Default_LSB_1);
+
+						// Set Default Value
+						this->B107AA_Register.Publish = __PUBLISH_REGISTER_DEFAULT__;
+
+					} else {
+
+						// Set Default Value
+						this->B107AA_Register.Publish = (((uint32_t)_Publish_Register_MSB_2 << 24) | ((uint32_t)_Publish_Register_MSB_1 << 16) | ((uint32_t)_Publish_Register_LSB_2 << 8) | (uint32_t)_Publish_Register_LSB_1);
+
+					}
+
+				}
+
+				// Read STOP Register from EEPROM Function
+				void Read_Stop_Register(void) {
+
+					// Declare Variables
+					uint8_t _Stop_Register_MSB_2;
+					uint8_t _Stop_Register_MSB_1;
+					uint8_t _Stop_Register_LSB_2;
+					uint8_t _Stop_Register_LSB_1;
+
+					// Read EEPROM
+					RV3028::EEPROM(READ, __EEPROM_STOP_MASK_MSB_2__, _Stop_Register_MSB_2);
+					RV3028::EEPROM(READ, __EEPROM_STOP_MASK_MSB_1__, _Stop_Register_MSB_1);
+					RV3028::EEPROM(READ, __EEPROM_STOP_MASK_LSB_2__, _Stop_Register_LSB_2);
+					RV3028::EEPROM(READ, __EEPROM_STOP_MASK_LSB_1__, _Stop_Register_LSB_1);
+
+					// Control for EEPROM
+					if (_Stop_Register_MSB_2 == 0x00 && _Stop_Register_MSB_1 == 0x00 && _Stop_Register_LSB_2 == 0x00 && _Stop_Register_LSB_1 == 0x00) {
+
+						// Define Default Values
+						uint8_t _Stop_Register_Default_MSB_2 = ((__STOP_REGISTER_DEFAULT__ >> 24) & 0xFF);
+						uint8_t _Stop_Register_Default_MSB_1 = ((__STOP_REGISTER_DEFAULT__ >> 16) & 0xFF);
+						uint8_t _Stop_Register_Default_LSB_2 = ((__STOP_REGISTER_DEFAULT__ >> 8) & 0xFF);
+						uint8_t _Stop_Register_Default_LSB_1 = ((__STOP_REGISTER_DEFAULT__ >> 0) & 0xFF);
+
+						// Set Default Value
+						RV3028::EEPROM(WRITE, __EEPROM_STOP_MASK_MSB_2__, _Stop_Register_Default_MSB_2);
+						RV3028::EEPROM(WRITE, __EEPROM_STOP_MASK_MSB_1__, _Stop_Register_Default_MSB_1);
+						RV3028::EEPROM(WRITE, __EEPROM_STOP_MASK_LSB_2__, _Stop_Register_Default_LSB_2);
+						RV3028::EEPROM(WRITE, __EEPROM_STOP_MASK_LSB_1__, _Stop_Register_Default_LSB_1);
+
+						// Set Default Value
+						this->B107AA_Register.Stop = __STOP_REGISTER_DEFAULT__;
+
+					} else {
+
+						// Set Default Value
+						this->B107AA_Register.Stop = (((uint32_t)_Stop_Register_MSB_2 << 24) | ((uint32_t)_Stop_Register_MSB_1 << 16) | ((uint32_t)_Stop_Register_LSB_2 << 8) | (uint32_t)_Stop_Register_LSB_1);
+
+					}
+
+				}
+
 				// Heartbeat Function
 				void Heartbeat(bool _LED = false) {
 
@@ -450,23 +646,20 @@
 					// Turn OFF HeartBeat
 					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);
 
+					// Calculate Loop Time
+					this->B107AA_Time.Loop_Time = (millis() - this->B107AA_Time.Last_Loop_Time);
+					B107AA_Time.Last_Loop_Time = millis();
+
+					// Control Terminal
+					this->Terminal_Control();
+
 				}
 
 				// Timer Interrupt Function
 				static void TIMER5_Handler(void) {
 
-					// Increase Timer
-					Hardware_Interrupt.Timer++;
-
-					// Handle MONI Interrupt every 300th Timer tick
-					if (Hardware_Interrupt.Timer % 300 == 0) {
-						Hardware_Interrupt.Status.MONI = true;
-					}
-
 					// Set Display Interrupts
-					Hardware_Interrupt.Display.Uptime = true;
-					Hardware_Interrupt.Display.Environment = true;
-					Hardware_Interrupt.Display.Battery = true;
+					B107AA_Interrupt.Status.Display = true;
 
 				}
 
@@ -474,46 +667,53 @@
 				static void INT4_Handler(void) {
 
 					// Set RS485 Interrupt
-					Hardware_Interrupt.Status.RS485 = true;
+					B107AA_Interrupt.Status.RS485 = true;
 
 				}
 
 				// PCMSK0 Mask Handler Function
 				static void PCMSK0_Handler(void) {
 
-					// Define Interrupt Variables
-					bool _Energy_Interrupt = false;
-					bool _Environment_Interrupt = false;
-					bool _RTC_Interrupt = false;
-
 					// Control for ENERGY Interrupt
-					if (Hardware_Interrupt.Mask.PCINT4_State != CONTROL_ENERGY_1) {
-						Hardware_Interrupt.Mask.PCINT4_State = CONTROL_ENERGY_1;
-						_Energy_Interrupt = true;
+					if (B107AA_Interrupt.Mask.PCINT4_State != CONTROL_ENERGY_1) {
+						B107AA_Interrupt.Mask.PCINT4_State = CONTROL_ENERGY_1;
+						B107AA_Interrupt.Status.Energy = true;
 					}
 
 					// Control for ENERGY Interrupt
-					if (Hardware_Interrupt.Mask.PCINT5_State != CONTROL_ENERGY_2) {
-						Hardware_Interrupt.Mask.PCINT5_State = CONTROL_ENERGY_2;
-						_Energy_Interrupt = true;
+					if (B107AA_Interrupt.Mask.PCINT5_State != CONTROL_ENERGY_2) {
+						B107AA_Interrupt.Mask.PCINT5_State = CONTROL_ENERGY_2;
+						B107AA_Interrupt.Status.Energy = true;
 					}
 
 					// Control for ENVIRONMENT Interrupt
-					if (Hardware_Interrupt.Mask.PCINT6_State != CONTROL_ENVIRONMENT) {
-						Hardware_Interrupt.Mask.PCINT6_State = CONTROL_ENVIRONMENT;
-						_Environment_Interrupt = true;
+					if (B107AA_Interrupt.Mask.PCINT6_State != CONTROL_ENVIRONMENT) {
+						B107AA_Interrupt.Mask.PCINT6_State = CONTROL_ENVIRONMENT;
+						B107AA_Interrupt.Status.Environment = true;
 					}
 
 					// Control for RTC Interrupt
-					if (Hardware_Interrupt.Mask.PCINT7_State != CONTROL_RTC) {
-						Hardware_Interrupt.Mask.PCINT7_State = CONTROL_RTC;
-						_RTC_Interrupt = true;
+					if (B107AA_Interrupt.Mask.PCINT7_State != CONTROL_RTC) {
+						B107AA_Interrupt.Mask.PCINT7_State = CONTROL_RTC;
+						B107AA_Interrupt.Status.RTC = true;
 					}
 
-					// Set Interrupt Updater
-					Hardware_Interrupt.Status.Energy = _Energy_Interrupt;
-					Hardware_Interrupt.Status.Environment = _Environment_Interrupt;
-					Hardware_Interrupt.Status.RTC = _RTC_Interrupt;
+				}
+
+				// PCMSK1 Mask Handler Function
+				static void PCMSK1_Handler(void) {
+
+					// Control for RING Interrupt
+					if (B107AA_Interrupt.Mask.PCINT11_State != CONTROL_GSM_RING) {
+						B107AA_Interrupt.Mask.PCINT11_State = CONTROL_GSM_RING;
+						B107AA_Interrupt.Status.GSM.Ring = true;
+					}
+
+					// Control for PMON Interrupt
+					if (B107AA_Interrupt.Mask.PCINT12_State != CONTROL_GSM_PMON) {
+						B107AA_Interrupt.Mask.PCINT12_State = CONTROL_GSM_PMON;
+						B107AA_Interrupt.Status.GSM.Power_Monitor = true;
+					}
 
 				}
 
@@ -521,18 +721,17 @@
 				static void PCMSK2_Handler(void) {
 
 					// Set Input Interrupt
-					Hardware_Interrupt.Status.Input = true;
+					B107AA_Interrupt.Status.Input = true;
 
 				}
 
 		};
 
 		// Define Interrupt Variables Structure
-		Hardware::Interrupt_Struct Hardware::Hardware_Interrupt;
-		Hardware::Terminal_Struct Hardware::Hardware_Terminal;
+		Hardware::B107AA_Interrupt_Struct Hardware::B107AA_Interrupt;
 
 		// Interrupt Routine TIMER5
-		ISR(TIMER5_COMPA_vect) {
+		ISR(TIMER5_COMPA_vect, ISR_NOBLOCK) {
 
 			// Call Timer Handler
 			Hardware::TIMER5_Handler();
@@ -552,6 +751,14 @@
 
 			// PCMSK0 Handler
 			Hardware::PCMSK0_Handler();
+
+		}
+
+		// Interrupt Routine PCMSK1 [PCINT8 - PCINT15]
+		ISR(PCINT1_vect, ISR_NOBLOCK) {
+
+			// PCMSK1 Handler
+			Hardware::PCMSK1_Handler();
 
 		}
 
