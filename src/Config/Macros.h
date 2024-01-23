@@ -10,6 +10,9 @@
 // Set Pin as Input with Pull-up
 #define SET_PIN_INPUT_PULLUP(_PIN) DDR_##_PIN &= ~(1 << PIN_##_PIN); PORT_##_PIN |= (1 << PIN_##_PIN);
 
+// Define frac function
+#define Frac(x) (int(1000*(x - int(x))))
+
 // B107AA Macro Definitions
 // ------------------------
 #ifdef _B107AA_
