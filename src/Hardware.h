@@ -204,111 +204,62 @@
 			public:
 
 				// Define Register Structure
-				struct B107AA_Register_Struct {
-
-					// Status Register
+				struct Register_Struct {
 					uint32_t Status = 0x00000000;
-
-					// Buffer Register
 					uint32_t Buffer = 0x00000000;
-
-					// Publish Register
 					uint32_t Publish = 0x00000000;
-
-					// Stop Register
 					uint32_t Stop = 0x00000000;
-
-				};
+				} Register;
 
 				// Define Time Variables Structure
-				struct B107AA_Time_Struct {
-
-					// Define Loop Timer
+				struct Time_Struct {
 					uint32_t Last_Loop_Time = 0;
-
-					// Define Loop Time
 					uint16_t Loop_Time = 0;
+				} Time;
 
+				// Diagnostic Variables
+				struct Diagnostic_Struct {
+					bool RV3028 = false;
+					bool DS28C = false;
+					bool HDC2010 = false;
+					bool MAX17055 = false;
+					bool BQ24298 = false;
+					bool MAX78630 = false;
+				} Diagnostic;
+
+				// Control for Debug
+				#if defined(_DEBUG_)
+
+					// Define Terminal Variables Structure
+					struct Terminal_Struct {
+						bool Sense = false;
+						bool Start = false;
+					} Terminal;
+
+				#endif
+
+				// Define Interrupt Structure
+				struct Interrupt_Mask_Structure {
+					bool PCINT4_State = false;
+					bool PCINT5_State = false;
+					bool PCINT6_State = false;
+					bool PCINT7_State = false;
+					bool PCINT11_State = false;
+					bool PCINT12_State = false;
 				};
-
-				// Define Interrupt Variables Structure
-				struct B107AA_Interrupt_Struct {
-
-					// Define Interrupt Mask Structure
-					struct Interrupt_Mask_Structure {
-
-						// PCINT4 Buffer
-						bool PCINT4_State = false;
-
-						// PCINT5 Buffer
-						bool PCINT5_State = false;
-
-						// PCINT6 Buffer
-						bool PCINT6_State = false;
-
-						// PCINT7 Buffer
-						bool PCINT7_State = false;
-
-						// PCINT11 Buffer
-						bool PCINT11_State = false;
-
-						// PCINT12 Buffer
-						bool PCINT12_State = false;
-
-					} Mask;
-
-					// Define Interrupt Status Structure
-					struct Interrupt_Status_Structure {
-
-						// Define Display Interrupt
-						bool Display = false;
-
-						// Define Input Interrupt
-						bool Input = false;
-
-						// Define Energy Interrupt
-						bool Energy = false;
-
-						// Define Environment Interrupt
-						bool Environment = false;
-
-						// Define RS485 Interrupt
-						bool RS485 = false;
-
-						// Define RTC Interrupt
-						bool RTC = false;
-
-						// Define GSM Interrupt Structure
-						struct B107AA_GSM_Interrupt_Structure {
-
-							// Define GSM Ring Interrupt
-							bool Ring = false;
-
-							// Define GSM Power Monitor Interrupt
-							bool Power_Monitor = false;
-
-						} GSM;
-
-					} Status;
-
-				};
-
-				// Define Terminal Variables Structure
-				struct B107AA_Terminal_Struct {
-
-					// Terminal Variables
-					bool Sense = false;
-
-					// Terminal Start
-					bool Start = false;
-
+				struct Interrupt_Status_Structure {
+					bool Display = false;
+					bool Input = false;
+					bool Energy = false;
+					bool Environment = false;
+					bool RS485 = false;
+					bool RTC = false;
+					bool Ring = false;
 				};
 
 				// Define Interrupt Variables
-				B107AA_Time_Struct B107AA_Time;
-				B107AA_Terminal_Struct B107AA_Terminal;
-				B107AA_Register_Struct B107AA_Register;
-				static B107AA_Interrupt_Struct B107AA_Interrupt;
+				static Interrupt_Mask_Structure Interrupt_Mask;
+				static Interrupt_Status_Structure Interrupt_Status;
 
 				// Module Constructor
 				Hardware(void) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298() {
@@ -321,8 +272,37 @@
 				// Begin Function
 				void Begin(void) {
 
-					// Control for Terminal Sense
-					this->B107AA_Terminal.Sense = !CONTROL_TERMINAL;
+					// Start DS28C
+					if (DS28C::Begin()) this->Diagnostic.DS28C = true;
+
+					// Start RTC
+					if (RV3028::Begin()) this->Diagnostic.RV3028 = true;
+
+					// Start TH Sensor
+					if (HDC2010::Begin()) this->Diagnostic.HDC2010 = true;
+
+					// Start Battery Gauge
+					if (MAX17055::Begin()) this->Diagnostic.MAX17055 = true;
+
+					// Start Charger
+					if (BQ24298::Begin()) this->Diagnostic.BQ24298 = true;
+
+					// Read Register from EEPROM
+					this->Read_Publish_Register();
+					this->Read_Stop_Register();
+
+					// Read Boot Default Interrupt Status
+					this->Interrupt_Mask.PCINT4_State = CONTROL_ENERGY_1;
+					this->Interrupt_Mask.PCINT5_State = CONTROL_ENERGY_2;
+					this->Interrupt_Mask.PCINT6_State = CONTROL_ENVIRONMENT;
+					this->Interrupt_Mask.PCINT7_State = CONTROL_RTC;
+					this->Interrupt_Mask.PCINT11_State = CONTROL_GSM_RING;
+
+					// Set Interrupt Updater
+					this->Interrupt_Status.Energy = this->Interrupt_Mask.PCINT4_State && this->Interrupt_Mask.PCINT5_State;
+					this->Interrupt_Status.Environment = this->Interrupt_Mask.PCINT6_State;
+					this->Interrupt_Status.RTC = this->Interrupt_Mask.PCINT7_State;
+					this->Interrupt_Status.Ring = this->Interrupt_Mask.PCINT11_State;
 
 					// Disable Interrupts
 					cli();
@@ -337,49 +317,17 @@
 					this->PCIEx_Mask(true, true, true);
 
 					// Set PCINT4-23 Interrupts
-					for (uint8_t i = INTERRUPT_PCINT4; i <= INTERRUPT_PCINT23; i++) this->PCINTxx_Interrupt(i, true);
+					this->PCINTxx_Interrupt(4, true);
+					this->PCINTxx_Interrupt(5, true);
+					this->PCINTxx_Interrupt(6, true);
+					this->PCINTxx_Interrupt(7, true);
+					this->PCINTxx_Interrupt(11, true);
 
-					// Get Serial ID
-					DS28C::Begin();
-
-					// Start RTC
-					RV3028::Begin();
-
-					// Start TH Sensor
-					HDC2010::Begin();
-
-					// Start Battery Gauge
-					MAX17055::Begin();
-
-					// Start Charger
-					BQ24298::Begin();
-
-					// Start Serial Communication
-					SERIAL_TERMINAL.begin(115200);
-					SERIAL_ENERGY.begin(38400);
-					SERIAL_GSM.begin(115200);
-
-					// Read Register from EEPROM
-					this->Read_Publish_Register();
-					this->Read_Stop_Register();
-
-					// Read Boot Default Interrupt Status
-					this->B107AA_Interrupt.Mask.PCINT4_State = CONTROL_ENERGY_1;
-					this->B107AA_Interrupt.Mask.PCINT5_State = CONTROL_ENERGY_2;
-					this->B107AA_Interrupt.Mask.PCINT6_State = CONTROL_ENVIRONMENT;
-					this->B107AA_Interrupt.Mask.PCINT7_State = CONTROL_RTC;
-					this->B107AA_Interrupt.Mask.PCINT11_State = CONTROL_GSM_RING;
-					this->B107AA_Interrupt.Mask.PCINT12_State = CONTROL_GSM_PMON;
-
-					// Set Interrupt Updater
-					this->B107AA_Interrupt.Status.Energy = this->B107AA_Interrupt.Mask.PCINT4_State && this->B107AA_Interrupt.Mask.PCINT5_State;
-					this->B107AA_Interrupt.Status.Environment = this->B107AA_Interrupt.Mask.PCINT6_State;
-					this->B107AA_Interrupt.Status.RTC = this->B107AA_Interrupt.Mask.PCINT7_State;
-					this->B107AA_Interrupt.Status.GSM.Ring = this->B107AA_Interrupt.Mask.PCINT11_State;
-					this->B107AA_Interrupt.Status.GSM.Power_Monitor = this->B107AA_Interrupt.Mask.PCINT12_State;
+					// Enable Interrupts
+					sei();
 
 					// Set Last Loop Time
-					this->B107AA_Time.Last_Loop_Time = millis();
+					this->Time.Last_Loop_Time = millis();
 
 				}
 
@@ -511,7 +459,7 @@
 				}
 
 				// Terminal Display Controller
-				void Terminal_Control(void) {
+				bool Terminal_Control(void) {
 
 					// Control for Terminal Sense
 					#if defined(_DEBUG_)
@@ -519,30 +467,35 @@
 						// Set Terminal Sense Variable	
 						if (CONTROL_TERMINAL) {
 
-							// Set Terminal Sense Variable
-							this->B107AA_Terminal.Sense = false;
-
 							// End Serial Stream
-							if (this->B107AA_Terminal.Start) Serial.end();
+							if (this->Terminal.Start) {
 
-							// Set Terminal Variable
-							this->B107AA_Terminal.Start = false;
+								// End Serial Stream
+								Serial.end();
+
+								// Set Terminal Variable
+								this->Terminal.Start = false;
+
+							}
+
+							// End Function
+							return(false);
 
 						} else {
 
-							// Set Terminal Sense Variable
-							this->B107AA_Terminal.Sense = true;
-
 							// Start Serial Stream
-							if (!this->B107AA_Terminal.Start) {
+							if (!this->Terminal.Start) {
 
 								// Set Terminal Start
 								Serial.begin(115200);
 
 								// Set Terminal Variable
-								this->B107AA_Terminal.Start = true;
+								this->Terminal.Start = true;
 
 							}
+
+							// End Function
+							return(true);
 
 						}
 
@@ -581,12 +534,12 @@
 						RV3028::EEPROM(WRITE, __EEPROM_PUBLISH_MASK_LSB_1__, _Publish_Register_Default_LSB_1);
 
 						// Set Default Value
-						this->B107AA_Register.Publish = __PUBLISH_REGISTER_DEFAULT__;
+						this->Register.Publish = __PUBLISH_REGISTER_DEFAULT__;
 
 					} else {
 
 						// Set Default Value
-						this->B107AA_Register.Publish = (((uint32_t)_Publish_Register_MSB_2 << 24) | ((uint32_t)_Publish_Register_MSB_1 << 16) | ((uint32_t)_Publish_Register_LSB_2 << 8) | (uint32_t)_Publish_Register_LSB_1);
+						this->Register.Publish = (((uint32_t)_Publish_Register_MSB_2 << 24) | ((uint32_t)_Publish_Register_MSB_1 << 16) | ((uint32_t)_Publish_Register_LSB_2 << 8) | (uint32_t)_Publish_Register_LSB_1);
 
 					}
 
@@ -623,14 +576,20 @@
 						RV3028::EEPROM(WRITE, __EEPROM_STOP_MASK_LSB_1__, _Stop_Register_Default_LSB_1);
 
 						// Set Default Value
-						this->B107AA_Register.Stop = __STOP_REGISTER_DEFAULT__;
+						this->Register.Stop = __STOP_REGISTER_DEFAULT__;
 
 					} else {
 
 						// Set Default Value
-						this->B107AA_Register.Stop = (((uint32_t)_Stop_Register_MSB_2 << 24) | ((uint32_t)_Stop_Register_MSB_1 << 16) | ((uint32_t)_Stop_Register_LSB_2 << 8) | (uint32_t)_Stop_Register_LSB_1);
+						this->Register.Stop = (((uint32_t)_Stop_Register_MSB_2 << 24) | ((uint32_t)_Stop_Register_MSB_1 << 16) | ((uint32_t)_Stop_Register_LSB_2 << 8) | (uint32_t)_Stop_Register_LSB_1);
 
 					}
+
+				}
+
+				// Read Input Signal Function
+				void Read_Inputs(void) {
+
 
 				}
 
@@ -647,11 +606,8 @@
 					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);
 
 					// Calculate Loop Time
-					this->B107AA_Time.Loop_Time = (millis() - this->B107AA_Time.Last_Loop_Time);
-					B107AA_Time.Last_Loop_Time = millis();
-
-					// Control Terminal
-					this->Terminal_Control();
+					this->Time.Loop_Time = (millis() - this->Time.Last_Loop_Time);
+					this->Time.Last_Loop_Time = millis();
 
 				}
 
@@ -659,7 +615,7 @@
 				static void TIMER5_Handler(void) {
 
 					// Set Display Interrupts
-					B107AA_Interrupt.Status.Display = true;
+					Interrupt_Status.Display = true;
 
 				}
 
@@ -667,7 +623,7 @@
 				static void INT4_Handler(void) {
 
 					// Set RS485 Interrupt
-					B107AA_Interrupt.Status.RS485 = true;
+					Interrupt_Status.RS485 = true;
 
 				}
 
@@ -675,27 +631,27 @@
 				static void PCMSK0_Handler(void) {
 
 					// Control for ENERGY Interrupt
-					if (B107AA_Interrupt.Mask.PCINT4_State != CONTROL_ENERGY_1) {
-						B107AA_Interrupt.Mask.PCINT4_State = CONTROL_ENERGY_1;
-						B107AA_Interrupt.Status.Energy = true;
+					if (Interrupt_Mask.PCINT4_State != CONTROL_ENERGY_1) {
+						Interrupt_Mask.PCINT4_State = CONTROL_ENERGY_1;
+						Interrupt_Status.Energy = true;
 					}
 
 					// Control for ENERGY Interrupt
-					if (B107AA_Interrupt.Mask.PCINT5_State != CONTROL_ENERGY_2) {
-						B107AA_Interrupt.Mask.PCINT5_State = CONTROL_ENERGY_2;
-						B107AA_Interrupt.Status.Energy = true;
+					if (Interrupt_Mask.PCINT5_State != CONTROL_ENERGY_2) {
+						Interrupt_Mask.PCINT5_State = CONTROL_ENERGY_2;
+						Interrupt_Status.Energy = true;
 					}
 
 					// Control for ENVIRONMENT Interrupt
-					if (B107AA_Interrupt.Mask.PCINT6_State != CONTROL_ENVIRONMENT) {
-						B107AA_Interrupt.Mask.PCINT6_State = CONTROL_ENVIRONMENT;
-						B107AA_Interrupt.Status.Environment = true;
+					if (Interrupt_Mask.PCINT6_State != CONTROL_ENVIRONMENT) {
+						Interrupt_Mask.PCINT6_State = CONTROL_ENVIRONMENT;
+						Interrupt_Status.Environment = true;
 					}
 
 					// Control for RTC Interrupt
-					if (B107AA_Interrupt.Mask.PCINT7_State != CONTROL_RTC) {
-						B107AA_Interrupt.Mask.PCINT7_State = CONTROL_RTC;
-						B107AA_Interrupt.Status.RTC = true;
+					if (Interrupt_Mask.PCINT7_State != CONTROL_RTC) {
+						Interrupt_Mask.PCINT7_State = CONTROL_RTC;
+						Interrupt_Status.RTC = true;
 					}
 
 				}
@@ -704,15 +660,9 @@
 				static void PCMSK1_Handler(void) {
 
 					// Control for RING Interrupt
-					if (B107AA_Interrupt.Mask.PCINT11_State != CONTROL_GSM_RING) {
-						B107AA_Interrupt.Mask.PCINT11_State = CONTROL_GSM_RING;
-						B107AA_Interrupt.Status.GSM.Ring = true;
-					}
-
-					// Control for PMON Interrupt
-					if (B107AA_Interrupt.Mask.PCINT12_State != CONTROL_GSM_PMON) {
-						B107AA_Interrupt.Mask.PCINT12_State = CONTROL_GSM_PMON;
-						B107AA_Interrupt.Status.GSM.Power_Monitor = true;
+					if (Interrupt_Mask.PCINT11_State != CONTROL_GSM_RING) {
+						Interrupt_Mask.PCINT11_State = CONTROL_GSM_RING;
+						Interrupt_Status.Ring = true;
 					}
 
 				}
@@ -721,14 +671,15 @@
 				static void PCMSK2_Handler(void) {
 
 					// Set Input Interrupt
-					B107AA_Interrupt.Status.Input = true;
+					Interrupt_Status.Input = true;
 
 				}
 
 		};
 
 		// Define Interrupt Variables Structure
-		Hardware::B107AA_Interrupt_Struct Hardware::B107AA_Interrupt;
+		Hardware::Interrupt_Mask_Structure Hardware::Interrupt_Mask;
+		Hardware::Interrupt_Status_Structure Hardware::Interrupt_Status;
 
 		// Interrupt Routine TIMER5
 		ISR(TIMER5_COMPA_vect, ISR_NOBLOCK) {
