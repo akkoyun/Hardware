@@ -244,8 +244,6 @@
 					bool PCINT5_State = false;
 					bool PCINT6_State = false;
 					bool PCINT7_State = false;
-					bool PCINT11_State = false;
-					bool PCINT12_State = false;
 				};
 				struct Interrupt_Status_Structure {
 					bool Display = false;
@@ -254,7 +252,6 @@
 					bool Environment = false;
 					bool RS485 = false;
 					bool RTC = false;
-					bool Ring = false;
 				};
 
 				// Define Interrupt Variables
@@ -296,13 +293,11 @@
 					this->Interrupt_Mask.PCINT5_State = CONTROL_ENERGY_2;
 					this->Interrupt_Mask.PCINT6_State = CONTROL_ENVIRONMENT;
 					this->Interrupt_Mask.PCINT7_State = CONTROL_RTC;
-					this->Interrupt_Mask.PCINT11_State = CONTROL_GSM_RING;
 
 					// Set Interrupt Updater
 					this->Interrupt_Status.Energy = this->Interrupt_Mask.PCINT4_State && this->Interrupt_Mask.PCINT5_State;
 					this->Interrupt_Status.Environment = this->Interrupt_Mask.PCINT6_State;
 					this->Interrupt_Status.RTC = this->Interrupt_Mask.PCINT7_State;
-					this->Interrupt_Status.Ring = this->Interrupt_Mask.PCINT11_State;
 
 					// Disable Interrupts
 					cli();
@@ -314,14 +309,13 @@
 					this->INTx_Interrupt(INT4, true, false);
 
 					// Set PCINTxx Mask Register
-					this->PCIEx_Mask(true, true, true);
+					this->PCIEx_Mask(true, false, true);
 
 					// Set PCINT4-23 Interrupts
 					this->PCINTxx_Interrupt(4, true);
 					this->PCINTxx_Interrupt(5, true);
 					this->PCINTxx_Interrupt(6, true);
 					this->PCINTxx_Interrupt(7, true);
-					this->PCINTxx_Interrupt(11, true);
 
 					// Enable Interrupts
 					sei();
@@ -656,17 +650,6 @@
 
 				}
 
-				// PCMSK1 Mask Handler Function
-				static void PCMSK1_Handler(void) {
-
-					// Control for RING Interrupt
-					if (Interrupt_Mask.PCINT11_State != CONTROL_GSM_RING) {
-						Interrupt_Mask.PCINT11_State = CONTROL_GSM_RING;
-						Interrupt_Status.Ring = true;
-					}
-
-				}
-
 				// PCMSK2 Mask Handler Function
 				static void PCMSK2_Handler(void) {
 
@@ -702,14 +685,6 @@
 
 			// PCMSK0 Handler
 			Hardware::PCMSK0_Handler();
-
-		}
-
-		// Interrupt Routine PCMSK1 [PCINT8 - PCINT15]
-		ISR(PCINT1_vect, ISR_NOBLOCK) {
-
-			// PCMSK1 Handler
-			Hardware::PCMSK1_Handler();
 
 		}
 
