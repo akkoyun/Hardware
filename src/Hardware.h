@@ -214,7 +214,7 @@
 				// Define Time Variables Structure
 				struct Time_Struct {
 					uint32_t Last_Loop_Time = 0;
-					uint16_t Loop_Time = 0;
+					uint32_t Loop_Time = 0;
 				} Time;
 
 				// Diagnostic Variables
@@ -587,6 +587,27 @@
 
 				}
 
+				// SD Multiplexer Function
+				void SD_Multiplexer(const bool _State) {
+
+					// Control for SD Sense
+					if (_State) {
+
+						// Set SD_EN
+						PORT_SD_EN |= (1 << PIN_SD_EN);
+
+					} else {
+
+						// Clear SD_EN
+						PORT_SD_EN &= ~(1 << PIN_SD_EN);
+
+					}
+
+					// SD Wait Delay
+					delay(200);
+
+				}
+
 				// Heartbeat Function
 				void Heartbeat(bool _LED = false) {
 
@@ -665,7 +686,7 @@
 		Hardware::Interrupt_Status_Structure Hardware::Interrupt_Status;
 
 		// Interrupt Routine TIMER5
-		ISR(TIMER5_COMPA_vect, ISR_NOBLOCK) {
+		ISR(TIMER5_COMPA_vect) {
 
 			// Call Timer Handler
 			Hardware::TIMER5_Handler();
@@ -673,7 +694,7 @@
 		}
 
 		// RS485 Interrupt
-		ISR(INT4_vect, ISR_NOBLOCK) {
+		ISR(INT4_vect) {
 
 			// Call INT4 Handler
 			Hardware::INT4_Handler();
@@ -681,7 +702,7 @@
 		}
 
 		// Interrupt Routine PCMSK0 [PCINT0 - PCINT7]
-		ISR(PCINT0_vect, ISR_NOBLOCK) {
+		ISR(PCINT0_vect) {
 
 			// PCMSK0 Handler
 			Hardware::PCMSK0_Handler();
@@ -689,7 +710,7 @@
 		}
 
 		// Interrupt Routine PCMSK2 [PCINT16 - PCINT23]
-		ISR(PCINT2_vect, ISR_NOBLOCK) {	
+		ISR(PCINT2_vect) {	
 
 			// PCMSK2 Handler
 			Hardware::PCMSK2_Handler();
