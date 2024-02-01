@@ -501,41 +501,13 @@
 				void Read_Publish_Register(void) {
 
 					// Declare Variables
-					uint8_t _Publish_Register_MSB_2;
-					uint8_t _Publish_Register_MSB_1;
-					uint8_t _Publish_Register_LSB_2;
-					uint8_t _Publish_Register_LSB_1;
+					uint8_t _Publish_Register_MSB_2 = RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_2__);
+					uint8_t _Publish_Register_MSB_1 = RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_1__);
+					uint8_t _Publish_Register_LSB_2	= RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_2__);
+					uint8_t _Publish_Register_LSB_1	= RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_1__);
 
-					// Read EEPROM
-					RV3028::EEPROM(READ, __EEPROM_PUBLISH_MASK_MSB_2__, _Publish_Register_MSB_2);
-					RV3028::EEPROM(READ, __EEPROM_PUBLISH_MASK_MSB_1__, _Publish_Register_MSB_1);
-					RV3028::EEPROM(READ, __EEPROM_PUBLISH_MASK_LSB_2__, _Publish_Register_LSB_2);
-					RV3028::EEPROM(READ, __EEPROM_PUBLISH_MASK_LSB_1__, _Publish_Register_LSB_1);
-
-					// Control for EEPROM
-					if (_Publish_Register_MSB_2 == 0x00 && _Publish_Register_MSB_1 == 0x00 && _Publish_Register_LSB_2 == 0x00 && _Publish_Register_LSB_1 == 0x00) {
-
-						// Define Default Values
-						uint8_t _Publish_Register_Default_MSB_2 = ((__PUBLISH_REGISTER_DEFAULT__ >> 24) & 0xFF);
-						uint8_t _Publish_Register_Default_MSB_1 = ((__PUBLISH_REGISTER_DEFAULT__ >> 16) & 0xFF);
-						uint8_t _Publish_Register_Default_LSB_2 = ((__PUBLISH_REGISTER_DEFAULT__ >> 8) & 0xFF);
-						uint8_t _Publish_Register_Default_LSB_1 = ((__PUBLISH_REGISTER_DEFAULT__ >> 0) & 0xFF);
-
-						// Set Default Value
-						RV3028::EEPROM(WRITE, __EEPROM_PUBLISH_MASK_MSB_2__, _Publish_Register_Default_MSB_2);
-						RV3028::EEPROM(WRITE, __EEPROM_PUBLISH_MASK_MSB_1__, _Publish_Register_Default_MSB_1);
-						RV3028::EEPROM(WRITE, __EEPROM_PUBLISH_MASK_LSB_2__, _Publish_Register_Default_LSB_2);
-						RV3028::EEPROM(WRITE, __EEPROM_PUBLISH_MASK_LSB_1__, _Publish_Register_Default_LSB_1);
-
-						// Set Default Value
-						this->Register.Publish = __PUBLISH_REGISTER_DEFAULT__;
-
-					} else {
-
-						// Set Default Value
-						this->Register.Publish = (((uint32_t)_Publish_Register_MSB_2 << 24) | ((uint32_t)_Publish_Register_MSB_1 << 16) | ((uint32_t)_Publish_Register_LSB_2 << 8) | (uint32_t)_Publish_Register_LSB_1);
-
-					}
+					// Set Default Value
+					this->Register.Publish = (((uint32_t)_Publish_Register_MSB_2 << 24) | ((uint32_t)_Publish_Register_MSB_1 << 16) | ((uint32_t)_Publish_Register_LSB_2 << 8) | (uint32_t)_Publish_Register_LSB_1);
 
 				}
 
@@ -543,41 +515,13 @@
 				void Read_Stop_Register(void) {
 
 					// Declare Variables
-					uint8_t _Stop_Register_MSB_2;
-					uint8_t _Stop_Register_MSB_1;
-					uint8_t _Stop_Register_LSB_2;
-					uint8_t _Stop_Register_LSB_1;
+					uint8_t _Stop_Register_MSB_2 = RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_2__);
+					uint8_t _Stop_Register_MSB_1 = RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_1__);
+					uint8_t _Stop_Register_LSB_2 = RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_2__);
+					uint8_t _Stop_Register_LSB_1 = RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_1__);
 
-					// Read EEPROM
-					RV3028::EEPROM(READ, __EEPROM_STOP_MASK_MSB_2__, _Stop_Register_MSB_2);
-					RV3028::EEPROM(READ, __EEPROM_STOP_MASK_MSB_1__, _Stop_Register_MSB_1);
-					RV3028::EEPROM(READ, __EEPROM_STOP_MASK_LSB_2__, _Stop_Register_LSB_2);
-					RV3028::EEPROM(READ, __EEPROM_STOP_MASK_LSB_1__, _Stop_Register_LSB_1);
-
-					// Control for EEPROM
-					if (_Stop_Register_MSB_2 == 0x00 && _Stop_Register_MSB_1 == 0x00 && _Stop_Register_LSB_2 == 0x00 && _Stop_Register_LSB_1 == 0x00) {
-
-						// Define Default Values
-						uint8_t _Stop_Register_Default_MSB_2 = ((__STOP_REGISTER_DEFAULT__ >> 24) & 0xFF);
-						uint8_t _Stop_Register_Default_MSB_1 = ((__STOP_REGISTER_DEFAULT__ >> 16) & 0xFF);
-						uint8_t _Stop_Register_Default_LSB_2 = ((__STOP_REGISTER_DEFAULT__ >> 8) & 0xFF);
-						uint8_t _Stop_Register_Default_LSB_1 = ((__STOP_REGISTER_DEFAULT__ >> 0) & 0xFF);
-
-						// Set Default Value
-						RV3028::EEPROM(WRITE, __EEPROM_STOP_MASK_MSB_2__, _Stop_Register_Default_MSB_2);
-						RV3028::EEPROM(WRITE, __EEPROM_STOP_MASK_MSB_1__, _Stop_Register_Default_MSB_1);
-						RV3028::EEPROM(WRITE, __EEPROM_STOP_MASK_LSB_2__, _Stop_Register_Default_LSB_2);
-						RV3028::EEPROM(WRITE, __EEPROM_STOP_MASK_LSB_1__, _Stop_Register_Default_LSB_1);
-
-						// Set Default Value
-						this->Register.Stop = __STOP_REGISTER_DEFAULT__;
-
-					} else {
-
-						// Set Default Value
-						this->Register.Stop = (((uint32_t)_Stop_Register_MSB_2 << 24) | ((uint32_t)_Stop_Register_MSB_1 << 16) | ((uint32_t)_Stop_Register_LSB_2 << 8) | (uint32_t)_Stop_Register_LSB_1);
-
-					}
+					// Set Default Value
+					this->Register.Stop = (((uint32_t)_Stop_Register_MSB_2 << 24) | ((uint32_t)_Stop_Register_MSB_1 << 16) | ((uint32_t)_Stop_Register_LSB_2 << 8) | (uint32_t)_Stop_Register_LSB_1);
 
 				}
 
