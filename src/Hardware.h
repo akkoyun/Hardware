@@ -528,6 +528,55 @@
 				// Read Input Signal Function
 				void Read_Inputs(void) {
 
+					// Set Input Port Variables
+					uint8_t _Port_Buffer = PINK;
+
+					// Handle Phase R Status
+					if (bitRead(_Port_Buffer, _Input_Pin_R_)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PHASE_R__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PHASE_R__);
+
+					}
+
+					// Handle Phase S Status
+					if (bitRead(_Port_Buffer, _Input_Pin_S_)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PHASE_S__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PHASE_S__);
+
+					}
+
+					// Handle Phase T Status
+					if (bitRead(_Port_Buffer, _Input_Pin_T_)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PHASE_T__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PHASE_T__);
+
+					}
+
+
+
+
+
+
+
+
 
 				}
 
