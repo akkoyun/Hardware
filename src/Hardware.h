@@ -625,7 +625,7 @@
 					}
 
 					// Handle for Pump Status
-					if (bitRead(_Port_Buffer, _Input_Pin_M1_) and bitRead(_Port_Buffer, _Input_Pin_M2_) and !bitRead(_Port_Buffer, _Input_Pin_M3_)) {
+					if (bitRead(_Port_Buffer, _Input_Pin_M1_) && bitRead(_Port_Buffer, _Input_Pin_M2_) && !bitRead(_Port_Buffer, _Input_Pin_M3_)) {
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_PUMP__);
@@ -639,12 +639,12 @@
 
 					// Handle for System Anomaly Status
 					if (
-						(bitRead(_Port_Buffer, _Input_Pin_M1_) and !bitRead(_Port_Buffer, _Input_Pin_M2_) and !bitRead(_Port_Buffer, _Input_Pin_M3_)) or 																				// Just M1 Active
-						(!bitRead(_Port_Buffer, _Input_Pin_M1_) and bitRead(_Port_Buffer, _Input_Pin_M2_) and !bitRead(_Port_Buffer, _Input_Pin_M3_)) or 																				// Just M2 Active
-						(!bitRead(_Port_Buffer, _Input_Pin_M1_) and !bitRead(_Port_Buffer, _Input_Pin_M2_) and bitRead(_Port_Buffer, _Input_Pin_M3_)) or 																				// Just M3 Active
-						(bitRead(this->Register.Status, __STATUS_PUMP__) and bitRead(_Port_Buffer, _Input_Pin_TH_)) or 																													// Pump Active and TH Active
-						(bitRead(this->Register.Status, __STATUS_PUMP__) and bitRead(_Port_Buffer, _Input_Pin_MP_)) or 																													// Pump Active and MP Active
-						(bitRead(this->Register.Status, __STATUS_PHASE_R__) and bitRead(this->Register.Status, __STATUS_PHASE_S__) and bitRead(this->Register.Status, __STATUS_PHASE_T__)) and (bitRead(_Port_Buffer, _Input_Pin_MP_))	// All Phases Active and MP Active
+						(bitRead(_Port_Buffer, _Input_Pin_M1_) && !bitRead(_Port_Buffer, _Input_Pin_M2_) && !bitRead(_Port_Buffer, _Input_Pin_M3_)) || 																				// Just M1 Active
+						(!bitRead(_Port_Buffer, _Input_Pin_M1_) && bitRead(_Port_Buffer, _Input_Pin_M2_) && !bitRead(_Port_Buffer, _Input_Pin_M3_)) || 																				// Just M2 Active
+						(!bitRead(_Port_Buffer, _Input_Pin_M1_) && !bitRead(_Port_Buffer, _Input_Pin_M2_) && bitRead(_Port_Buffer, _Input_Pin_M3_)) || 																				// Just M3 Active
+						(bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, _Input_Pin_TH_)) || 																												// Pump Active and TH Active
+						(bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, _Input_Pin_MP_)) || 																												// Pump Active and MP Active
+						(bitRead(this->Register.Status, __STATUS_PHASE_R__) && bitRead(this->Register.Status, __STATUS_PHASE_S__) && bitRead(this->Register.Status, __STATUS_PHASE_T__)) && (bitRead(_Port_Buffer, _Input_Pin_MP_))	// All Phases Active and MP Active
 					) {
 
 						// Set Status Register
