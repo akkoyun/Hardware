@@ -644,7 +644,7 @@
 						(!bitRead(_Port_Buffer, _Input_Pin_M1_) && !bitRead(_Port_Buffer, _Input_Pin_M2_) && bitRead(_Port_Buffer, _Input_Pin_M3_)) || 																				// Just M3 Active
 						(bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, _Input_Pin_TH_)) || 																												// Pump Active and TH Active
 						(bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, _Input_Pin_MP_)) || 																												// Pump Active and MP Active
-						(bitRead(this->Register.Status, __STATUS_PHASE_R__) && bitRead(this->Register.Status, __STATUS_PHASE_S__) && bitRead(this->Register.Status, __STATUS_PHASE_T__)) && (bitRead(_Port_Buffer, _Input_Pin_MP_))	// All Phases Active and MP Active
+						(bitRead(this->Register.Status, __STATUS_PHASE_R__) && bitRead(this->Register.Status, __STATUS_PHASE_S__) && bitRead(this->Register.Status, __STATUS_PHASE_T__) && bitRead(_Port_Buffer, _Input_Pin_MP_))	// All Phases Active and MP Active
 					) {
 
 						// Set Status Register
