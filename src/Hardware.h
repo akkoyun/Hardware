@@ -247,7 +247,6 @@
 				};
 				struct Interrupt_Status_Structure {
 					bool Display = false;
-					bool Input = false;
 					bool Energy = false;
 					bool Environment = false;
 					bool RS485 = false;
@@ -258,11 +257,17 @@
 				static Interrupt_Mask_Structure Interrupt_Mask;
 				static Interrupt_Status_Structure Interrupt_Status;
 
+				// Module Instance
+				static Hardware* instance;
+
 				// Module Constructor
 				Hardware(void) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298() {
 
 					// Set Pin Out
 					this->Set_PinOut();
+
+					// Set Instance
+					instance = this;
 
 				}
 
@@ -316,6 +321,16 @@
 					this->PCINTxx_Interrupt(5, true);
 					this->PCINTxx_Interrupt(6, true);
 					this->PCINTxx_Interrupt(7, true);
+
+					// Set PCINT16-23 Interrupts
+					this->PCINTxx_Interrupt(16, true);
+					this->PCINTxx_Interrupt(17, true);
+					this->PCINTxx_Interrupt(18, true);
+					this->PCINTxx_Interrupt(19, true);
+					this->PCINTxx_Interrupt(20, true);
+					this->PCINTxx_Interrupt(21, true);
+					this->PCINTxx_Interrupt(22, true);
+					this->PCINTxx_Interrupt(23, true);
 
 					// Enable Interrupts
 					sei();
@@ -525,6 +540,19 @@
 
 				}
 
+				// Static Read Inputs Function
+			    static void Read_Inputs_Static() {
+
+					// Control for Instance
+			        if (instance) {
+
+						// Read Inputs
+            			instance->Read_Inputs();
+
+        			}
+
+    			}
+
 				// Read Input Signal Function
 				void Read_Inputs(void) {
 
@@ -570,13 +598,64 @@
 
 					}
 
+					// Handle Thermic Relay Status
+					if (bitRead(_Port_Buffer, _Input_Pin_TH_)) {
 
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_TH__);
 
+					} else {
 
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_FAULT_TH__);
 
+					}
 
+					// Handle Motor Protection Relay Status
+					if (bitRead(_Port_Buffer, _Input_Pin_MP_)) {
 
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_MP__);
 
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_FAULT_MP__);
+
+					}
+
+					// Handle for Pump Status
+					if (bitRead(_Port_Buffer, _Input_Pin_M1_) and bitRead(_Port_Buffer, _Input_Pin_M2_) and !bitRead(_Port_Buffer, _Input_Pin_M3_)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PUMP__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PUMP__);
+
+					}
+
+					// Handle for System Anomaly Status
+					if (
+						(bitRead(_Port_Buffer, _Input_Pin_M1_) and !bitRead(_Port_Buffer, _Input_Pin_M2_) and !bitRead(_Port_Buffer, _Input_Pin_M3_)) or 																				// Just M1 Active
+						(!bitRead(_Port_Buffer, _Input_Pin_M1_) and bitRead(_Port_Buffer, _Input_Pin_M2_) and !bitRead(_Port_Buffer, _Input_Pin_M3_)) or 																				// Just M2 Active
+						(!bitRead(_Port_Buffer, _Input_Pin_M1_) and !bitRead(_Port_Buffer, _Input_Pin_M2_) and bitRead(_Port_Buffer, _Input_Pin_M3_)) or 																				// Just M3 Active
+						(bitRead(this->Register.Status, __STATUS_PUMP__) and bitRead(_Port_Buffer, _Input_Pin_TH_)) or 																													// Pump Active and TH Active
+						(bitRead(this->Register.Status, __STATUS_PUMP__) and bitRead(_Port_Buffer, _Input_Pin_MP_)) or 																													// Pump Active and MP Active
+						(bitRead(this->Register.Status, __STATUS_PHASE_R__) and bitRead(this->Register.Status, __STATUS_PHASE_S__) and bitRead(this->Register.Status, __STATUS_PHASE_T__)) and (bitRead(_Port_Buffer, _Input_Pin_MP_))	// All Phases Active and MP Active
+					) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_FAULT_SA__);
+
+					}
 
 				}
 
@@ -664,19 +743,12 @@
 
 				}
 
-				// PCMSK2 Mask Handler Function
-				static void PCMSK2_Handler(void) {
-
-					// Set Input Interrupt
-					Interrupt_Status.Input = true;
-
-				}
-
 		};
 
 		// Define Interrupt Variables Structure
 		Hardware::Interrupt_Mask_Structure Hardware::Interrupt_Mask;
 		Hardware::Interrupt_Status_Structure Hardware::Interrupt_Status;
+		Hardware* Hardware::instance = nullptr;
 
 		// Interrupt Routine TIMER5
 		ISR(TIMER5_COMPA_vect) {
@@ -706,7 +778,7 @@
 		ISR(PCINT2_vect) {	
 
 			// PCMSK2 Handler
-			Hardware::PCMSK2_Handler();
+			Hardware::Read_Inputs_Static();
 
 		}
 
