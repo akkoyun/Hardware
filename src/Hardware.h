@@ -304,6 +304,9 @@
 					this->Interrupt_Status.Environment = this->Interrupt_Mask.PCINT6_State;
 					this->Interrupt_Status.RTC = this->Interrupt_Mask.PCINT7_State;
 
+					// Control for Inputs
+					this->Read_Inputs();
+
 					// Disable Interrupts
 					cli();
 
