@@ -1,3 +1,8 @@
+// Include Arduino Library
+#ifndef Arduino_h
+    #include <Arduino.h>
+#endif
+
 // Set Pin as Output with Pull-down
 #define SET_PIN_OUTPUT_PULLDOWN(_PIN) DDR_##_PIN |= (1 << PIN_##_PIN); PORT_##_PIN &= ~(1 << PIN_##_PIN);
 

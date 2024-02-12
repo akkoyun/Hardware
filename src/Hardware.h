@@ -12,13 +12,14 @@
 #define __Hardware__
 
 	// Include Arduino Library
-	#ifndef __Arduino__
+	#ifndef Arduino_h
 		#include <Arduino.h>
 	#endif
 
 	// Include Config Files
 	#include "Config/Constants.h"
 	#include "Config/Macros.h"
+	#include "Config/Config.h"
 
 	// B107AA Class
 	#ifdef _B107AA_
@@ -43,8 +44,237 @@
 			#include <BQ24298.h>
 		#endif
 
+		// GSM Hardware Class
+		class GSM_Hardware {
+
+			// Public Context
+			public:
+
+				// Power Switch
+				void Power_Switch(const bool _State = false) {
+
+					// Control for _State
+					if (_State) {
+
+						// Set PIN_EN_3V8 pin HIGH
+						PORT_EN_3V8 |= (1 << PIN_EN_3V8);
+
+
+					} else {
+
+						// Set PIN_EN_3V8 pin LOW
+						PORT_EN_3V8 &= ~(1 << PIN_EN_3V8);
+
+					}
+
+				}
+
+				// Enable Communication Buffer.
+				void Communication(const bool _State = false) {
+
+					// Control for _State
+					if (_State) {
+
+						// Set GSM_COMM_EN pin LOW
+						PORT_GSM_COMM_EN &= ~(1 << PIN_GSM_COMM_EN);
+
+					} else {
+
+						// Set GSM_COMM_EN pin HIGH
+						PORT_GSM_COMM_EN |= (1 << PIN_GSM_COMM_EN);
+
+					}
+
+				}
+
+				// Get Power Monitor
+				bool Power_Monitor(void) {
+
+					// Control for PIN_GSM_PMON pin
+					if ((PIN_REGISTER_GSM_PMON & (1 << PIN_GSM_PMON)) == (1 << PIN_GSM_PMON)) {
+
+						// End Function
+						return (true);
+
+					} else {
+
+						// End Function
+						return(false);
+
+					}
+
+				}
+
+				// Get Software Ready
+				bool SWReady(void) {
+
+					// Control for PIN_GSM_SWREADY pin
+					if ((PIN_REGISTER_GSM_SWREADY & (1 << PIN_GSM_SWREADY)) == (1 << PIN_GSM_SWREADY)) {
+
+						// End Function
+						return (true);
+
+					} else {
+
+						// End Function
+						return(false);
+
+					}
+
+				}
+
+				// On or Off Modem.
+				void On_Off(const uint16_t _Time) {
+
+					// Set PIN_GSM_ONOFF Signal HIGH
+					PORT_GSM_ONOFF |= (1 << PIN_GSM_ONOFF);
+
+					// Command Delay
+					for (uint8_t i = 0; i < 36; i++) {
+
+						// Calculate Delay (2000)
+						uint8_t _Delay = _Time / 37;
+
+						// Wait
+						delay(_Delay); 
+
+					}
+
+					// Set PIN_GSM_ONOFF Signal LOW
+					PORT_GSM_ONOFF &= ~(1 << PIN_GSM_ONOFF);
+
+				}
+
+				// ShutDown Modem
+				void Shut_Down(const uint16_t _Time) {
+
+					// Set PIN_GSM_SDOWN Signal HIGH
+					PORT_GSM_SDOWN |= (1 << PIN_GSM_SDOWN);
+
+					// Command Delay
+					delay(_Time);
+
+					// Set PIN_GSM_SDOWN Signal LOW
+					PORT_GSM_SDOWN &= ~(1 << PIN_GSM_SDOWN);
+
+				}
+
+				// Power ON Sequence of Modem
+				bool ON(void) {
+
+					// Get Start Time
+					uint32_t _Start_Time = millis();
+
+					// Enable GSM Modem Power Switch
+					this->Power_Switch(true);  
+
+					// Power On Delay
+					delay(10);
+
+					// Set Communication Signal LOW
+					this->Communication(true);
+
+					// Communication Delay
+					delay(10);
+
+					// Turn On Modem
+					if (this->Power_Monitor()) {
+
+						// End Function
+						return (true);
+
+					} else {
+
+						// Send On Off Signal
+						this->On_Off(1500);
+
+						// Wait for Power Monitor
+						while (millis() - _Start_Time < 15000) {
+
+							// Control for PWMon (PJ3)
+							if (this->Power_Monitor()) {
+
+								// Wait for Software Ready
+								while (millis() - _Start_Time < 30000) {
+
+									// Control for SWReady (PJ4)
+									if (this->SWReady()) return (true);
+
+									// Wait Delay
+									delay(10);
+
+								}
+
+							}
+
+							// Wait Delay
+							delay(10);
+
+						}
+
+					}
+
+					// End Function
+					return (false);
+
+				}
+
+				// Power OFF Sequence of Modem
+				bool OFF(void) {
+
+					// Turn Off Modem
+					if (this->Power_Monitor()) {
+
+						// Turn Off Modem
+						this->On_Off(2750);
+
+						// Set Variable
+						bool _Power = true;
+
+						// Read Current Time
+						const uint32_t _Current_Time = millis();
+
+						// Control for Power Monitor
+						while (_Power) {
+
+							// Control for PowerMonitor
+							if (!this->Power_Monitor()) {
+
+								// Set Variable
+								_Power = false;
+
+								// Disable GSM Modem Voltage Translator
+								this->Communication(false);
+
+								// Disable GSM Modem Main Power Switch
+								this->Power_Switch(false);  
+
+							}
+
+							// Handle for timeout
+							if (millis() - _Current_Time >= 15000) break;;
+
+						}
+						
+					} else {
+
+						// Disable GSM Modem Voltage Translator
+						this->Communication(false);
+
+						// Disable GSM Modem Main Power Switch
+						this->Power_Switch(false);  
+
+					}
+
+					// End Function
+					return (true);
+
+				}
+
+		};
+			
 		// Hardware Class
-		class Hardware : public RV3028, public DS28C, public HDC2010, public MAX17055, public BQ24298 {
+		class B107AA : public GSM_Hardware, public RV3028, public DS28C, public HDC2010, public MAX17055, public BQ24298 {
 
 			// Private Context
 			private:
@@ -92,7 +322,7 @@
 				}
 
 				// Module 1 Second Timer
-				inline void AVR_Timer() {
+				inline void AVR_Timer(void) {
 
 					// Set CTC Mod and Rescale (1024)
 					TCCR5A = 0;
@@ -200,6 +430,17 @@
 
 				}
 
+				// Read PUBLISH Register from EEPROM Function
+				void Read_Register(void) {
+
+					// Read Publish Register
+					this->Register.Publish = (((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_2__) << 24) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_1__) << 16) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_2__) << 8) | (uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_1__));
+
+					// Read Stop Register
+					this->Register.Stop = (((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_2__) << 24) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_1__) << 16) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_2__) << 8) | (uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_1__));
+
+				}
+
 			// Public Context
 			public:
 
@@ -216,16 +457,6 @@
 					uint32_t Last_Loop_Time = 0;
 					uint32_t Loop_Time = 0;
 				} Time;
-
-				// Diagnostic Variables
-				struct Diagnostic_Struct {
-					bool RV3028 = false;
-					bool DS28C = false;
-					bool HDC2010 = false;
-					bool MAX17055 = false;
-					bool BQ24298 = false;
-					bool MAX78630 = false;
-				} Diagnostic;
 
 				// Control for Debug
 				#if defined(_DEBUG_)
@@ -258,10 +489,10 @@
 				static Interrupt_Status_Structure Interrupt_Status;
 
 				// Module Instance
-				static Hardware* instance;
+				static B107AA* instance;
 
 				// Module Constructor
-				Hardware(void) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298() {
+				B107AA(void) : GSM_Hardware(), RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298() {
 
 					// Set Pin Out
 					this->Set_PinOut();
@@ -274,24 +505,15 @@
 				// Begin Function
 				void Begin(void) {
 
-					// Start DS28C
-					if (DS28C::Begin()) this->Diagnostic.DS28C = true;
-
-					// Start RTC
-					if (RV3028::Begin()) this->Diagnostic.RV3028 = true;
-
-					// Start TH Sensor
-					if (HDC2010::Begin()) this->Diagnostic.HDC2010 = true;
-
-					// Start Battery Gauge
-					if (MAX17055::Begin()) this->Diagnostic.MAX17055 = true;
-
-					// Start Charger
-					if (BQ24298::Begin()) this->Diagnostic.BQ24298 = true;
+					// Start Objects
+					DS28C::Begin();
+					RV3028::Begin();
+					HDC2010::Begin();
+					MAX17055::Begin();
+					BQ24298::Begin();
 
 					// Read Register from EEPROM
-					this->Read_Publish_Register();
-					this->Read_Stop_Register();
+					this->Read_Register();
 
 					// Read Boot Default Interrupt Status
 					this->Interrupt_Mask.PCINT4_State = CONTROL_ENERGY_1;
@@ -342,6 +564,251 @@
 					this->Time.Last_Loop_Time = millis();
 
 				}
+
+				// Terminal Functions
+				// ------------------
+
+				// Terminal Display Controller
+				bool Terminal_Control(void) {
+
+					// Control for Terminal Sense
+					#if defined(_DEBUG_)
+
+						// Set Terminal Sense Variable	
+						if (CONTROL_TERMINAL) {
+
+							// End Serial Stream
+							if (this->Terminal.Start) {
+
+								// End Serial Stream
+								Serial.end();
+
+								// Set Terminal Variable
+								this->Terminal.Start = false;
+
+							}
+
+							// End Function
+							return(false);
+
+						} else {
+
+							// Start Serial Stream
+							if (!this->Terminal.Start) {
+
+								// Set Terminal Start
+								Serial.begin(115200);
+
+								// Set Terminal Variable
+								this->Terminal.Start = true;
+
+							}
+
+							// End Function
+							return(true);
+
+						}
+
+					#endif
+
+				}
+
+				// Input Control Functions
+				// -----------------------
+
+				// Static Read Inputs Function
+			    static void Read_Inputs_Static() {
+
+					// Control for Instance
+			        if (instance) {
+
+						// Read Inputs
+            			instance->Read_Inputs();
+
+        			}
+
+    			}
+
+				// Read Input Signal Function
+				void Read_Inputs(void) {
+
+					// Set Input Port Variables
+					uint8_t _Port_Buffer = PINK;
+
+					// Handle Phase R Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_R__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PHASE_R__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PHASE_R__);
+
+					}
+
+					// Handle Phase S Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_S__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PHASE_S__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PHASE_S__);
+
+					}
+
+					// Handle Phase T Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_T__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PHASE_T__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PHASE_T__);
+
+					}
+
+					// Handle Thermic Relay Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_TH__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_TH__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_FAULT_TH__);
+
+					}
+
+					// Handle Motor Protection Relay Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_MP__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_MP__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_FAULT_MP__);
+
+					}
+
+					// Handle for Pump Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_M1__) && bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PUMP__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PUMP__);
+
+					}
+
+					// Handle for System Anomaly Status
+					if (
+						(bitRead(_Port_Buffer, __INPUT_PIN_M1__) && !bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__)) || 																		// Just M1 Active
+						(!bitRead(_Port_Buffer, __INPUT_PIN_M1__) && bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__)) || 																		// Just M2 Active
+						(!bitRead(_Port_Buffer, __INPUT_PIN_M1__) && !bitRead(_Port_Buffer, __INPUT_PIN_M2__) && bitRead(_Port_Buffer, __INPUT_PIN_M3__)) || 																		// Just M3 Active
+						(bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, __INPUT_PIN_TH__)) || 																											// Pump Active and TH Active
+						(bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, __INPUT_PIN_MP__)) || 																											// Pump Active and MP Active
+						(bitRead(this->Register.Status, __STATUS_PHASE_R__) && bitRead(this->Register.Status, __STATUS_PHASE_S__) && bitRead(this->Register.Status, __STATUS_PHASE_T__) && bitRead(_Port_Buffer, __INPUT_PIN_MP__))	// All Phases Active and MP Active
+					) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_FAULT_SA__);
+
+					}
+
+				}
+
+				// SD Card Functions
+				// -----------------
+
+				// SD Multiplexer Function
+				void SD_Multiplexer(const bool _State) {
+
+					// Control for SD Sense
+					if (_State) {
+
+						// Set SD_EN
+						PORT_SD_EN |= (1 << PIN_SD_EN);
+
+					} else {
+
+						// Clear SD_EN
+						PORT_SD_EN &= ~(1 << PIN_SD_EN);
+
+					}
+
+					// SD Wait Delay
+					delay(200);
+
+				}
+
+				// ISR Handler Functions
+				// ---------------------
+
+				// Timer Interrupt Function
+				static void TIMER5_Handler(void) {
+
+					// Set Display Interrupts
+					Interrupt_Status.Display = true;
+
+				}
+
+				// INT4 Interrupt Function
+				static void INT4_Handler(void) {
+
+					// Set RS485 Interrupt
+					Interrupt_Status.RS485 = true;
+
+				}
+
+				// PCMSK0 Mask Handler Function
+				static void PCMSK0_Handler(void) {
+
+					// Control for ENERGY Interrupt
+					if (Interrupt_Mask.PCINT4_State != CONTROL_ENERGY_1) {
+						Interrupt_Mask.PCINT4_State = CONTROL_ENERGY_1;
+						Interrupt_Status.Energy = true;
+					}
+
+					// Control for ENERGY Interrupt
+					if (Interrupt_Mask.PCINT5_State != CONTROL_ENERGY_2) {
+						Interrupt_Mask.PCINT5_State = CONTROL_ENERGY_2;
+						Interrupt_Status.Energy = true;
+					}
+
+					// Control for ENVIRONMENT Interrupt
+					if (Interrupt_Mask.PCINT6_State != CONTROL_ENVIRONMENT) {
+						Interrupt_Mask.PCINT6_State = CONTROL_ENVIRONMENT;
+						Interrupt_Status.Environment = true;
+					}
+
+					// Control for RTC Interrupt
+					if (Interrupt_Mask.PCINT7_State != CONTROL_RTC) {
+						Interrupt_Mask.PCINT7_State = CONTROL_RTC;
+						Interrupt_Status.RTC = true;
+					}
+
+				}
+
+				// LED Functions
+				// -------------
 
 				// LED Function
 				void LED(const uint8_t _Color = LED_WHITE, const uint8_t _Blink = 1, const uint16_t _Interval = 500) {
@@ -470,221 +937,11 @@
 
 				}
 
-				// Terminal Display Controller
-				bool Terminal_Control(void) {
-
-					// Control for Terminal Sense
-					#if defined(_DEBUG_)
-
-						// Set Terminal Sense Variable	
-						if (CONTROL_TERMINAL) {
-
-							// End Serial Stream
-							if (this->Terminal.Start) {
-
-								// End Serial Stream
-								Serial.end();
-
-								// Set Terminal Variable
-								this->Terminal.Start = false;
-
-							}
-
-							// End Function
-							return(false);
-
-						} else {
-
-							// Start Serial Stream
-							if (!this->Terminal.Start) {
-
-								// Set Terminal Start
-								Serial.begin(115200);
-
-								// Set Terminal Variable
-								this->Terminal.Start = true;
-
-							}
-
-							// End Function
-							return(true);
-
-						}
-
-					#endif
-
-				}
-
-				// Read PUBLISH Register from EEPROM Function
-				void Read_Publish_Register(void) {
-
-					// Declare Variables
-					uint8_t _Publish_Register_MSB_2 = RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_2__);
-					uint8_t _Publish_Register_MSB_1 = RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_1__);
-					uint8_t _Publish_Register_LSB_2	= RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_2__);
-					uint8_t _Publish_Register_LSB_1	= RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_1__);
-
-					// Set Default Value
-					this->Register.Publish = (((uint32_t)_Publish_Register_MSB_2 << 24) | ((uint32_t)_Publish_Register_MSB_1 << 16) | ((uint32_t)_Publish_Register_LSB_2 << 8) | (uint32_t)_Publish_Register_LSB_1);
-
-				}
-
-				// Read STOP Register from EEPROM Function
-				void Read_Stop_Register(void) {
-
-					// Declare Variables
-					uint8_t _Stop_Register_MSB_2 = RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_2__);
-					uint8_t _Stop_Register_MSB_1 = RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_1__);
-					uint8_t _Stop_Register_LSB_2 = RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_2__);
-					uint8_t _Stop_Register_LSB_1 = RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_1__);
-
-					// Set Default Value
-					this->Register.Stop = (((uint32_t)_Stop_Register_MSB_2 << 24) | ((uint32_t)_Stop_Register_MSB_1 << 16) | ((uint32_t)_Stop_Register_LSB_2 << 8) | (uint32_t)_Stop_Register_LSB_1);
-
-				}
-
-				// Static Read Inputs Function
-			    static void Read_Inputs_Static() {
-
-					// Control for Instance
-			        if (instance) {
-
-						// Read Inputs
-            			instance->Read_Inputs();
-
-        			}
-
-    			}
-
-				// Read Input Signal Function
-				void Read_Inputs(void) {
-
-					// Set Input Port Variables
-					uint8_t _Port_Buffer = PINK;
-
-					// Handle Phase R Status
-					if (bitRead(_Port_Buffer, _Input_Pin_R_)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PHASE_R__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PHASE_R__);
-
-					}
-
-					// Handle Phase S Status
-					if (bitRead(_Port_Buffer, _Input_Pin_S_)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PHASE_S__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PHASE_S__);
-
-					}
-
-					// Handle Phase T Status
-					if (bitRead(_Port_Buffer, _Input_Pin_T_)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PHASE_T__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PHASE_T__);
-
-					}
-
-					// Handle Thermic Relay Status
-					if (bitRead(_Port_Buffer, _Input_Pin_TH_)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_TH__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_FAULT_TH__);
-
-					}
-
-					// Handle Motor Protection Relay Status
-					if (bitRead(_Port_Buffer, _Input_Pin_MP_)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_MP__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_FAULT_MP__);
-
-					}
-
-					// Handle for Pump Status
-					if (bitRead(_Port_Buffer, _Input_Pin_M1_) && bitRead(_Port_Buffer, _Input_Pin_M2_) && !bitRead(_Port_Buffer, _Input_Pin_M3_)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PUMP__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PUMP__);
-
-					}
-
-					// Handle for System Anomaly Status
-					if (
-						(bitRead(_Port_Buffer, _Input_Pin_M1_) && !bitRead(_Port_Buffer, _Input_Pin_M2_) && !bitRead(_Port_Buffer, _Input_Pin_M3_)) || 																				// Just M1 Active
-						(!bitRead(_Port_Buffer, _Input_Pin_M1_) && bitRead(_Port_Buffer, _Input_Pin_M2_) && !bitRead(_Port_Buffer, _Input_Pin_M3_)) || 																				// Just M2 Active
-						(!bitRead(_Port_Buffer, _Input_Pin_M1_) && !bitRead(_Port_Buffer, _Input_Pin_M2_) && bitRead(_Port_Buffer, _Input_Pin_M3_)) || 																				// Just M3 Active
-						(bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, _Input_Pin_TH_)) || 																												// Pump Active and TH Active
-						(bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, _Input_Pin_MP_)) || 																												// Pump Active and MP Active
-						(bitRead(this->Register.Status, __STATUS_PHASE_R__) && bitRead(this->Register.Status, __STATUS_PHASE_S__) && bitRead(this->Register.Status, __STATUS_PHASE_T__) && bitRead(_Port_Buffer, _Input_Pin_MP_))	// All Phases Active and MP Active
-					) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_FAULT_SA__);
-
-					}
-
-				}
-
-				// SD Multiplexer Function
-				void SD_Multiplexer(const bool _State) {
-
-					// Control for SD Sense
-					if (_State) {
-
-						// Set SD_EN
-						PORT_SD_EN |= (1 << PIN_SD_EN);
-
-					} else {
-
-						// Clear SD_EN
-						PORT_SD_EN &= ~(1 << PIN_SD_EN);
-
-					}
-
-					// SD Wait Delay
-					delay(200);
-
-				}
+				// WatchDog Functions
+				// ------------------
 
 				// Heartbeat Function
-				void Heartbeat(bool _LED = false) {
+				void Heartbeat(const bool _LED = false) {
 
 					// Turn ON HeartBeat
 					PORT_HEARTBEAT |= (1 << PIN_HEARTBEAT);
@@ -701,63 +958,18 @@
 
 				}
 
-				// Timer Interrupt Function
-				static void TIMER5_Handler(void) {
-
-					// Set Display Interrupts
-					Interrupt_Status.Display = true;
-
-				}
-
-				// INT4 Interrupt Function
-				static void INT4_Handler(void) {
-
-					// Set RS485 Interrupt
-					Interrupt_Status.RS485 = true;
-
-				}
-
-				// PCMSK0 Mask Handler Function
-				static void PCMSK0_Handler(void) {
-
-					// Control for ENERGY Interrupt
-					if (Interrupt_Mask.PCINT4_State != CONTROL_ENERGY_1) {
-						Interrupt_Mask.PCINT4_State = CONTROL_ENERGY_1;
-						Interrupt_Status.Energy = true;
-					}
-
-					// Control for ENERGY Interrupt
-					if (Interrupt_Mask.PCINT5_State != CONTROL_ENERGY_2) {
-						Interrupt_Mask.PCINT5_State = CONTROL_ENERGY_2;
-						Interrupt_Status.Energy = true;
-					}
-
-					// Control for ENVIRONMENT Interrupt
-					if (Interrupt_Mask.PCINT6_State != CONTROL_ENVIRONMENT) {
-						Interrupt_Mask.PCINT6_State = CONTROL_ENVIRONMENT;
-						Interrupt_Status.Environment = true;
-					}
-
-					// Control for RTC Interrupt
-					if (Interrupt_Mask.PCINT7_State != CONTROL_RTC) {
-						Interrupt_Mask.PCINT7_State = CONTROL_RTC;
-						Interrupt_Status.RTC = true;
-					}
-
-				}
-
 		};
 
 		// Define Interrupt Variables Structure
-		Hardware::Interrupt_Mask_Structure Hardware::Interrupt_Mask;
-		Hardware::Interrupt_Status_Structure Hardware::Interrupt_Status;
-		Hardware* Hardware::instance = nullptr;
+		B107AA::Interrupt_Mask_Structure B107AA::Interrupt_Mask;
+		B107AA::Interrupt_Status_Structure B107AA::Interrupt_Status;
+		B107AA* B107AA::instance = nullptr;
 
 		// Interrupt Routine TIMER5
 		ISR(TIMER5_COMPA_vect) {
 
 			// Call Timer Handler
-			Hardware::TIMER5_Handler();
+			B107AA::TIMER5_Handler();
 
 		}
 
@@ -765,7 +977,7 @@
 		ISR(INT4_vect) {
 
 			// Call INT4 Handler
-			Hardware::INT4_Handler();
+			B107AA::INT4_Handler();
 
 		}
 
@@ -773,7 +985,7 @@
 		ISR(PCINT0_vect) {
 
 			// PCMSK0 Handler
-			Hardware::PCMSK0_Handler();
+			B107AA::PCMSK0_Handler();
 
 		}
 
@@ -781,7 +993,7 @@
 		ISR(PCINT2_vect) {	
 
 			// PCMSK2 Handler
-			Hardware::Read_Inputs_Static();
+			B107AA::Read_Inputs_Static();
 
 		}
 

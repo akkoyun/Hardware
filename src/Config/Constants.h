@@ -1,7 +1,10 @@
+// Include Arduino Library
+#ifndef Arduino_h
+    #include <Arduino.h>
+#endif
+
 // LED Definitions
 // -----------------------------
-
-// Define LED Colors
 #define LED_RED 	        1
 #define LED_GREEN 	        2
 #define LED_BLUE 	        3
