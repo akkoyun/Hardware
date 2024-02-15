@@ -44,237 +44,8 @@
 			#include <BQ24298.h>
 		#endif
 
-		// GSM Hardware Class
-		class GSM_Hardware {
-
-			// Public Context
-			public:
-
-				// Power Switch
-				void Power_Switch(const bool _State = false) {
-
-					// Control for _State
-					if (_State) {
-
-						// Set PIN_EN_3V8 pin HIGH
-						PORT_EN_3V8 |= (1 << PIN_EN_3V8);
-
-
-					} else {
-
-						// Set PIN_EN_3V8 pin LOW
-						PORT_EN_3V8 &= ~(1 << PIN_EN_3V8);
-
-					}
-
-				}
-
-				// Enable Communication Buffer.
-				void Communication(const bool _State = false) {
-
-					// Control for _State
-					if (_State) {
-
-						// Set GSM_COMM_EN pin LOW
-						PORT_GSM_COMM_EN &= ~(1 << PIN_GSM_COMM_EN);
-
-					} else {
-
-						// Set GSM_COMM_EN pin HIGH
-						PORT_GSM_COMM_EN |= (1 << PIN_GSM_COMM_EN);
-
-					}
-
-				}
-
-				// Get Power Monitor
-				bool Power_Monitor(void) {
-
-					// Control for PIN_GSM_PMON pin
-					if ((PIN_REGISTER_GSM_PMON & (1 << PIN_GSM_PMON)) == (1 << PIN_GSM_PMON)) {
-
-						// End Function
-						return (true);
-
-					} else {
-
-						// End Function
-						return(false);
-
-					}
-
-				}
-
-				// Get Software Ready
-				bool SWReady(void) {
-
-					// Control for PIN_GSM_SWREADY pin
-					if ((PIN_REGISTER_GSM_SWREADY & (1 << PIN_GSM_SWREADY)) == (1 << PIN_GSM_SWREADY)) {
-
-						// End Function
-						return (true);
-
-					} else {
-
-						// End Function
-						return(false);
-
-					}
-
-				}
-
-				// On or Off Modem.
-				void On_Off(const uint16_t _Time) {
-
-					// Set PIN_GSM_ONOFF Signal HIGH
-					PORT_GSM_ONOFF |= (1 << PIN_GSM_ONOFF);
-
-					// Command Delay
-					for (uint8_t i = 0; i < 36; i++) {
-
-						// Calculate Delay (2000)
-						uint8_t _Delay = _Time / 37;
-
-						// Wait
-						delay(_Delay); 
-
-					}
-
-					// Set PIN_GSM_ONOFF Signal LOW
-					PORT_GSM_ONOFF &= ~(1 << PIN_GSM_ONOFF);
-
-				}
-
-				// ShutDown Modem
-				void Shut_Down(const uint16_t _Time) {
-
-					// Set PIN_GSM_SDOWN Signal HIGH
-					PORT_GSM_SDOWN |= (1 << PIN_GSM_SDOWN);
-
-					// Command Delay
-					delay(_Time);
-
-					// Set PIN_GSM_SDOWN Signal LOW
-					PORT_GSM_SDOWN &= ~(1 << PIN_GSM_SDOWN);
-
-				}
-
-				// Power ON Sequence of Modem
-				bool ON(void) {
-
-					// Get Start Time
-					uint32_t _Start_Time = millis();
-
-					// Enable GSM Modem Power Switch
-					this->Power_Switch(true);  
-
-					// Power On Delay
-					delay(10);
-
-					// Set Communication Signal LOW
-					this->Communication(true);
-
-					// Communication Delay
-					delay(10);
-
-					// Turn On Modem
-					if (this->Power_Monitor()) {
-
-						// End Function
-						return (true);
-
-					} else {
-
-						// Send On Off Signal
-						this->On_Off(1500);
-
-						// Wait for Power Monitor
-						while (millis() - _Start_Time < 15000) {
-
-							// Control for PWMon (PJ3)
-							if (this->Power_Monitor()) {
-
-								// Wait for Software Ready
-								while (millis() - _Start_Time < 30000) {
-
-									// Control for SWReady (PJ4)
-									if (this->SWReady()) return (true);
-
-									// Wait Delay
-									delay(10);
-
-								}
-
-							}
-
-							// Wait Delay
-							delay(10);
-
-						}
-
-					}
-
-					// End Function
-					return (false);
-
-				}
-
-				// Power OFF Sequence of Modem
-				bool OFF(void) {
-
-					// Turn Off Modem
-					if (this->Power_Monitor()) {
-
-						// Turn Off Modem
-						this->On_Off(2750);
-
-						// Set Variable
-						bool _Power = true;
-
-						// Read Current Time
-						const uint32_t _Current_Time = millis();
-
-						// Control for Power Monitor
-						while (_Power) {
-
-							// Control for PowerMonitor
-							if (!this->Power_Monitor()) {
-
-								// Set Variable
-								_Power = false;
-
-								// Disable GSM Modem Voltage Translator
-								this->Communication(false);
-
-								// Disable GSM Modem Main Power Switch
-								this->Power_Switch(false);  
-
-							}
-
-							// Handle for timeout
-							if (millis() - _Current_Time >= 15000) break;;
-
-						}
-						
-					} else {
-
-						// Disable GSM Modem Voltage Translator
-						this->Communication(false);
-
-						// Disable GSM Modem Main Power Switch
-						this->Power_Switch(false);  
-
-					}
-
-					// End Function
-					return (true);
-
-				}
-
-		};
-			
 		// Hardware Class
-		class B107AA : public GSM_Hardware, public RV3028, public DS28C, public HDC2010, public MAX17055, public BQ24298 {
+		class B107AA : public RV3028, public DS28C, public HDC2010, public MAX17055, public BQ24298 {
 
 			// Private Context
 			private:
@@ -492,7 +263,7 @@
 				static B107AA* instance;
 
 				// Module Constructor
-				B107AA(void) : GSM_Hardware(), RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298() {
+				B107AA(void) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298() {
 
 					// Set Pin Out
 					this->Set_PinOut();
@@ -610,6 +381,9 @@
 						}
 
 					#endif
+
+					// End Function
+					return(false);
 
 				}
 

@@ -1,6 +1,6 @@
 {
 	"name": "Hardware",
-	"version": "2.3.0",
+	"version": "2.3.1",
 	"keywords": "AVR, Functions, Atmel, STF, Modules, B107AA, B108AA, B152BA, B153AA",
     "description": "Advanced hardware modules for AVR microcontrollers, optimized for IoT applications in smart agriculture. Includes sensor integration and power management features.",
 	"authors": [
@@ -18,6 +18,13 @@
 	"license": "MIT",
 	"frameworks": "arduino",
 	"headers": "Hardware.h",
+	"dependencies":
+	[
+		{
+			"owner": "akkoyun",
+			"name": "I2C_Functions"
+		}
+	],
 	"platforms": [
 		"atmelavr",
 		"atmelmegaavr"
