@@ -152,7 +152,7 @@
 				inline void PCINTxx_Interrupt(uint8_t _PCINT, bool _Status = false) {
 
 					// Set PCINTxx Interrupt
-					if (_PCINT >= 0 && _PCINT <= 7) {
+					if (_PCINT <= 7) {
 
 						// Control for Status
 						if (_Status) {
