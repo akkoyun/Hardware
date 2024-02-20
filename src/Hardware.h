@@ -52,7 +52,7 @@
 
 				// Module Pin Definitions
 				inline void Set_PinOut(void) {
-					
+
 					// Set Module Pin Definitions
 					SET_PIN_OUTPUT_PULLDOWN(RELAY_START);		// Set RELAY_START as Output with Pull-Down
 					SET_PIN_OUTPUT_PULLDOWN(RELAY_STOP);		// Set RELAY_STOP as Output with Pull-Down
@@ -167,7 +167,7 @@
 
 						}
 
-					} else if (_PCINT >= 8 && _PCINT <= 15) {
+					} else if (_PCINT <= 15) {
 
 						// Control for Status
 						if (_Status) {
@@ -182,7 +182,7 @@
 
 						}
 
-					} else if (_PCINT >= 16 && _PCINT <= 23) {
+					} else if (_PCINT <= 23) {
 
 						// Control for Status
 						if (_Status) {
