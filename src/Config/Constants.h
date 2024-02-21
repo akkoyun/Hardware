@@ -40,10 +40,12 @@
 
 // Interrupt Mask Definitions
 // -----------------------------
-#define INTERRUPT_MASK_PCINT4	0
-#define INTERRUPT_MASK_PCINT5	1
-#define INTERRUPT_MASK_PCINT6	2
-#define INTERRUPT_MASK_PCINT7	3
+#define INTERRUPT_MASK_PCINT4	    0
+#define INTERRUPT_MASK_PCINT5	    1
+#define INTERRUPT_MASK_PCINT6	    2
+#define INTERRUPT_MASK_PCINT7	    3
+#define INTERRUPT_TERMINAL_SENSE	6
+#define INTERRUPT_TERMINAL_START	7
 
 // Interrupt Definitions
 // ---------------------

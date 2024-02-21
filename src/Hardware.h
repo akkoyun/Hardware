@@ -229,17 +229,6 @@
 					uint32_t Loop_Time = 0;
 				} Time;
 
-				// Control for Debug
-				#if defined(_DEBUG_)
-
-					// Define Terminal Variables Structure
-					struct Terminal_Struct {
-						bool Sense = false;
-						bool Start = false;
-					} Terminal;
-
-				#endif
-
 				// Define Interrupt Variables
 				static uint8_t Interrupt_Mask;
 				static uint8_t Interrupt_Status;
@@ -331,16 +320,16 @@
 					#if defined(_DEBUG_)
 
 						// Set Terminal Sense Variable	
-						if (CONTROL_TERMINAL) {
+						if (bitRead(PIN_REGISTER_TERMINAL_SENSE, PIN_TERMINAL_SENSE)) {
 
 							// End Serial Stream
-							if (this->Terminal.Start) {
+							if (bitSet(Interrupt_Mask, INTERRUPT_TERMINAL_START)) {
 
 								// End Serial Stream
 								Serial.end();
 
 								// Set Terminal Variable
-								this->Terminal.Start = false;
+								bitClear(Interrupt_Mask, INTERRUPT_TERMINAL_START);
 
 							}
 
@@ -350,13 +339,13 @@
 						} else {
 
 							// Start Serial Stream
-							if (!this->Terminal.Start) {
+							if (!bitRead(Interrupt_Mask, INTERRUPT_TERMINAL_START)) {
 
-								// Set Terminal Start
+								// Start Serial Stream
 								Serial.begin(115200);
 
 								// Set Terminal Variable
-								this->Terminal.Start = true;
+								bitSet(Interrupt_Mask, INTERRUPT_TERMINAL_START);
 
 							}
 
@@ -376,7 +365,7 @@
 				// -----------------------
 
 				// Static Read Inputs Function
-			    static void Read_Inputs_Static() {
+			    static void Read_Inputs_Static(void) {
 
 					// Control for Instance
 			        if (instance) {
@@ -498,7 +487,7 @@
 				// -----------------
 
 				// SD Multiplexer Function
-				void SD_Multiplexer(const bool _State) {
+				void SD_Multiplexer(const bool _State = false) {
 
 					// Control for SD Sense
 					if (_State) {
@@ -587,34 +576,64 @@
 				}
 
 				// Interrupt Handler Function
-				inline bool INT_DISPLAY(void) {
+				inline bool INT_DISPLAY(const bool _Clear = false) {
+
+					// Get Interrupt Status
+					const bool _Status = bitRead(Interrupt_Status, INTERRUPT_DISPLAY);
+
+					// Control for Clear
+					if (_Clear) bitClear(Interrupt_Status, INTERRUPT_DISPLAY);
 
 					// Return Display Interrupt
-					return(bitRead(Interrupt_Status, INTERRUPT_DISPLAY));
+					return(_Status);
 
 				}
-				inline bool INT_ENERGY(void) {
+				inline bool INT_ENERGY(const bool _Clear = false) {
+
+					// Get Interrupt Status
+					const bool _Status = bitRead(Interrupt_Status, INTERRUPT_ENERGY);
+
+					// Control for Clear
+					if (_Clear) bitClear(Interrupt_Status, INTERRUPT_ENERGY);
 
 					// Return ENERGY Interrupt
-					return(bitRead(Interrupt_Status, INTERRUPT_ENERGY));
+					return(_Status);
 
 				}
-				inline bool INT_ENVIRONMENT(void) {
+				inline bool INT_ENVIRONMENT(const bool _Clear = false) {
+
+					// Get Interrupt Status
+					const bool _Status = bitRead(Interrupt_Status, INTERRUPT_ENVIRONMENT);
+
+					// Control for Clear
+					if (_Clear) bitClear(Interrupt_Status, INTERRUPT_ENVIRONMENT);
 
 					// Return ENVIRONMENT Interrupt
-					return(bitRead(Interrupt_Status, INTERRUPT_ENVIRONMENT));
+					return(_Status);
 
 				}
-				inline bool INT_RS485(void) {
+				inline bool INT_RS485(const bool _Clear = false) {
+
+					// Get Interrupt Status
+					const bool _Status = bitRead(Interrupt_Status, INTERRUPT_RS485);
+
+					// Control for Clear
+					if (_Clear) bitClear(Interrupt_Status, INTERRUPT_RS485);
 
 					// Return RS485 Interrupt
-					return(bitRead(Interrupt_Status, INTERRUPT_RS485));
+					return(_Status);
 
 				}
-				inline bool INT_RTC(void) {
+				inline bool INT_RTC(const bool _Clear = false) {
+
+					// Get Interrupt Status
+					const bool _Status = bitRead(Interrupt_Status, INTERRUPT_RTC);
+
+					// Control for Clear
+					if (_Clear) bitClear(Interrupt_Status, INTERRUPT_RTC);
 
 					// Return RTC Interrupt
-					return(bitRead(Interrupt_Status, INTERRUPT_RTC));
+					return(_Status);
 
 				}
 
