@@ -38,6 +38,21 @@
 #define INTERRUPT_PCINT22	22
 #define INTERRUPT_PCINT23	23
 
+// Interrupt Mask Definitions
+// -----------------------------
+#define INTERRUPT_MASK_PCINT4	0
+#define INTERRUPT_MASK_PCINT5	1
+#define INTERRUPT_MASK_PCINT6	2
+#define INTERRUPT_MASK_PCINT7	3
+
+// Interrupt Definitions
+// ---------------------
+#define INTERRUPT_DISPLAY		0
+#define INTERRUPT_ENERGY		1
+#define INTERRUPT_ENVIRONMENT	2
+#define INTERRUPT_RS485			3
+#define INTERRUPT_RTC			4
+
 // EEPROM Definitions
 // -----------------------------
 

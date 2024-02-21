@@ -240,24 +240,9 @@
 
 				#endif
 
-				// Define Interrupt Structure
-				struct Interrupt_Mask_Structure {
-					bool PCINT4_State = false;
-					bool PCINT5_State = false;
-					bool PCINT6_State = false;
-					bool PCINT7_State = false;
-				};
-				struct Interrupt_Status_Structure {
-					bool Display = false;
-					bool Energy = false;
-					bool Environment = false;
-					bool RS485 = false;
-					bool RTC = false;
-				};
-
 				// Define Interrupt Variables
-				static Interrupt_Mask_Structure Interrupt_Mask;
-				static Interrupt_Status_Structure Interrupt_Status;
+				static uint8_t Interrupt_Mask;
+				static uint8_t Interrupt_Status;
 
 				// Module Instance
 				static B107AA* instance;
@@ -287,15 +272,15 @@
 					this->Read_Register();
 
 					// Read Boot Default Interrupt Status
-					this->Interrupt_Mask.PCINT4_State = CONTROL_ENERGY_1;
-					this->Interrupt_Mask.PCINT5_State = CONTROL_ENERGY_2;
-					this->Interrupt_Mask.PCINT6_State = CONTROL_ENVIRONMENT;
-					this->Interrupt_Mask.PCINT7_State = CONTROL_RTC;
+					if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {bitSet(Interrupt_Mask, INTERRUPT_MASK_PCINT4);} else {bitClear(Interrupt_Mask, INTERRUPT_MASK_PCINT4);}
+					if (bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {bitSet(Interrupt_Mask, INTERRUPT_MASK_PCINT5);} else {bitClear(Interrupt_Mask, INTERRUPT_MASK_PCINT5);}
+					if (bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {bitSet(Interrupt_Mask, INTERRUPT_MASK_PCINT6);} else {bitClear(Interrupt_Mask, INTERRUPT_MASK_PCINT6);}
+					if (bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {bitSet(Interrupt_Mask, INTERRUPT_MASK_PCINT7);} else {bitClear(Interrupt_Mask, INTERRUPT_MASK_PCINT7);}
 
 					// Set Interrupt Updater
-					this->Interrupt_Status.Energy = this->Interrupt_Mask.PCINT4_State && this->Interrupt_Mask.PCINT5_State;
-					this->Interrupt_Status.Environment = this->Interrupt_Mask.PCINT6_State;
-					this->Interrupt_Status.RTC = this->Interrupt_Mask.PCINT7_State;
+					if (bitRead(Interrupt_Mask, INTERRUPT_MASK_PCINT4) && bitRead(Interrupt_Mask, INTERRUPT_MASK_PCINT5)) {bitSet(Interrupt_Status, INTERRUPT_ENERGY);} else {bitClear(Interrupt_Status, INTERRUPT_ENERGY);}
+					if (bitRead(Interrupt_Mask, INTERRUPT_MASK_PCINT6)) {bitSet(Interrupt_Status, INTERRUPT_ENVIRONMENT);} else {bitClear(Interrupt_Status, INTERRUPT_ENVIRONMENT);}
+					if (bitRead(Interrupt_Mask, INTERRUPT_MASK_PCINT7)) {bitSet(Interrupt_Status, INTERRUPT_RTC);} else {bitClear(Interrupt_Status, INTERRUPT_RTC);}
 
 					// Control for Inputs
 					this->Read_Inputs();
@@ -540,7 +525,7 @@
 				static void TIMER5_Handler(void) {
 
 					// Set Display Interrupts
-					Interrupt_Status.Display = true;
+					bitSet(Interrupt_Status, INTERRUPT_DISPLAY);
 
 				}
 
@@ -548,7 +533,7 @@
 				static void INT4_Handler(void) {
 
 					// Set RS485 Interrupt
-					Interrupt_Status.RS485 = true;
+					bitSet(Interrupt_Status, INTERRUPT_RS485);
 
 				}
 
@@ -556,28 +541,80 @@
 				static void PCMSK0_Handler(void) {
 
 					// Control for ENERGY Interrupt
-					if (Interrupt_Mask.PCINT4_State != CONTROL_ENERGY_1) {
-						Interrupt_Mask.PCINT4_State = CONTROL_ENERGY_1;
-						Interrupt_Status.Energy = true;
+					if (bitRead(Interrupt_Mask, INTERRUPT_MASK_PCINT4) != bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
+
+						// Set ENERGY Interrupt
+						if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {bitSet(Interrupt_Mask, INTERRUPT_MASK_PCINT4);} else {bitClear(Interrupt_Mask, INTERRUPT_MASK_PCINT4);}
+
+						// Set ENERGY Interrupt
+						bitSet(Interrupt_Status, INTERRUPT_ENERGY);
+
 					}
 
 					// Control for ENERGY Interrupt
-					if (Interrupt_Mask.PCINT5_State != CONTROL_ENERGY_2) {
-						Interrupt_Mask.PCINT5_State = CONTROL_ENERGY_2;
-						Interrupt_Status.Energy = true;
+					if (bitRead(Interrupt_Mask, INTERRUPT_MASK_PCINT5) != bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
+
+						// Set ENERGY Interrupt
+						if (bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {bitSet(Interrupt_Mask, INTERRUPT_MASK_PCINT5);} else {bitClear(Interrupt_Mask, INTERRUPT_MASK_PCINT5);}
+
+						// Set ENERGY Interrupt
+						bitSet(Interrupt_Status, INTERRUPT_ENERGY);
+
 					}
 
 					// Control for ENVIRONMENT Interrupt
-					if (Interrupt_Mask.PCINT6_State != CONTROL_ENVIRONMENT) {
-						Interrupt_Mask.PCINT6_State = CONTROL_ENVIRONMENT;
-						Interrupt_Status.Environment = true;
+					if (bitRead(Interrupt_Mask, INTERRUPT_MASK_PCINT6) != bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
+
+						// Set ENVIRONMENT Interrupt
+						if (bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {bitSet(Interrupt_Mask, INTERRUPT_MASK_PCINT6);} else {bitClear(Interrupt_Mask, INTERRUPT_MASK_PCINT6);}
+
+						// Set ENVIRONMENT Interrupt
+						bitSet(Interrupt_Status, INTERRUPT_ENVIRONMENT);
+
 					}
 
 					// Control for RTC Interrupt
-					if (Interrupt_Mask.PCINT7_State != CONTROL_RTC) {
-						Interrupt_Mask.PCINT7_State = CONTROL_RTC;
-						Interrupt_Status.RTC = true;
+					if (bitRead(Interrupt_Mask, INTERRUPT_MASK_PCINT7) != bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
+
+						// Set RTC Interrupt
+						if (bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {bitSet(Interrupt_Mask, INTERRUPT_MASK_PCINT7);} else {bitClear(Interrupt_Mask, INTERRUPT_MASK_PCINT7);}
+
+						// Set RTC Interrupt
+						bitSet(Interrupt_Status, INTERRUPT_RTC);
+
 					}
+
+				}
+
+				// Interrupt Handler Function
+				inline bool INT_DISPLAY(void) {
+
+					// Return Display Interrupt
+					return(bitRead(Interrupt_Status, INTERRUPT_DISPLAY));
+
+				}
+				inline bool INT_ENERGY(void) {
+
+					// Return ENERGY Interrupt
+					return(bitRead(Interrupt_Status, INTERRUPT_ENERGY));
+
+				}
+				inline bool INT_ENVIRONMENT(void) {
+
+					// Return ENVIRONMENT Interrupt
+					return(bitRead(Interrupt_Status, INTERRUPT_ENVIRONMENT));
+
+				}
+				inline bool INT_RS485(void) {
+
+					// Return RS485 Interrupt
+					return(bitRead(Interrupt_Status, INTERRUPT_RS485));
+
+				}
+				inline bool INT_RTC(void) {
+
+					// Return RTC Interrupt
+					return(bitRead(Interrupt_Status, INTERRUPT_RTC));
 
 				}
 
@@ -735,8 +772,8 @@
 		};
 
 		// Define Interrupt Variables Structure
-		B107AA::Interrupt_Mask_Structure B107AA::Interrupt_Mask;
-		B107AA::Interrupt_Status_Structure B107AA::Interrupt_Status;
+		uint8_t B107AA::Interrupt_Mask = 0x00;
+		uint8_t B107AA::Interrupt_Status = 0x00;
 		B107AA* B107AA::instance = nullptr;
 
 		// Interrupt Routine TIMER5
