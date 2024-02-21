@@ -217,17 +217,11 @@
 
 				// Define Register Structure
 				struct Register_Struct {
-					uint32_t Status = 0x00000000;
-					uint32_t Buffer = 0x00000000;
-					uint32_t Publish = 0x00000000;
-					uint32_t Stop = 0x00000000;
+					uint32_t Status = 0;
+					uint32_t Buffer = 0;
+					uint32_t Publish = 0;
+					uint32_t Stop = 0;
 				} Register;
-
-				// Define Time Variables Structure
-				struct Time_Struct {
-					uint32_t Last_Loop_Time = 0;
-					uint32_t Loop_Time = 0;
-				} Time;
 
 				// Define Interrupt Variables
 				static uint8_t Interrupt_Mask;
@@ -304,9 +298,6 @@
 
 					// Enable Interrupts
 					sei();
-
-					// Set Last Loop Time
-					this->Time.Last_Loop_Time = millis();
 
 				}
 
@@ -771,22 +762,215 @@
 				// ------------------
 
 				// Heartbeat Function
-				void Heartbeat(const bool _LED = false) {
+				void Heartbeat(const bool _LED = false, const uint8_t _Color = LED_GREEN) {
 
 					// Turn ON HeartBeat
 					PORT_HEARTBEAT |= (1 << PIN_HEARTBEAT);
 
 					// HeartBeat LED Blink
-					if (_LED) this->LED(LED_GREEN, 1, 50);
+					if (_LED) this->LED(_Color, 1, 50);
 
 					// Turn OFF HeartBeat
 					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);
 
-					// Calculate Loop Time
-					this->Time.Loop_Time = (millis() - this->Time.Last_Loop_Time);
-					this->Time.Last_Loop_Time = millis();
-
 				}
+
+				// GSM Functions
+				// -------------
+
+				#if defined(_LE910C1_EUX_)
+
+					// Power Switch
+					inline void Power_Switch(const bool _State = false) {
+
+						// Control for _State
+						if (_State) {
+
+							// Set PIN_EN_3V8 pin HIGH
+							PORT_EN_3V8 |= (1 << PIN_EN_3V8);
+
+
+						} else {
+
+							// Set PIN_EN_3V8 pin LOW
+							PORT_EN_3V8 &= ~(1 << PIN_EN_3V8);
+
+						}
+
+					}
+
+					// Enable Communication Buffer.
+					inline void Communication(const bool _State = false) {
+
+						// Control for _State
+						if (_State) {
+
+							// Set GSM_COMM_EN pin LOW
+							PORT_GSM_COMM_EN &= ~(1 << PIN_GSM_COMM_EN);
+
+						} else {
+
+							// Set GSM_COMM_EN pin HIGH
+							PORT_GSM_COMM_EN |= (1 << PIN_GSM_COMM_EN);
+
+						}
+
+					}
+
+					// On or Off Modem.
+					inline void OnOff(const uint16_t _Time = 1500) {
+
+						// Set PIN_GSM_ONOFF Signal HIGH
+						PORT_GSM_ONOFF |= (1 << PIN_GSM_ONOFF);
+
+						// Command Delay
+						delay(_Time);					
+
+						// Set PIN_GSM_ONOFF Signal LOW
+						PORT_GSM_ONOFF &= ~(1 << PIN_GSM_ONOFF);
+
+					}
+
+					// ShutDown Modem
+					inline void ShutDown(const uint16_t _Time) {
+
+						// Set PIN_GSM_SDOWN Signal HIGH
+						PORT_GSM_SDOWN |= (1 << PIN_GSM_SDOWN);
+
+						// Command Delay
+						delay(_Time);
+
+						// Set PIN_GSM_SDOWN Signal LOW
+						PORT_GSM_SDOWN &= ~(1 << PIN_GSM_SDOWN);
+
+					}
+
+					// Get Power Monitor
+					inline bool PowerMonitor(void) {
+
+						// Return Power Monitor
+						return (bitRead(PIN_REGISTER_GSM_PMON, PIN_GSM_PMON));
+
+					}
+
+					// Get Software Ready
+					inline bool SWReady(void) {
+
+						// Return Software Ready
+						return (bitRead(PIN_REGISTER_GSM_SWREADY, PIN_GSM_SWREADY));
+
+					}
+
+					// Power ON Sequence of Modem
+					bool ON(void) {
+
+						// Get Start Time
+						const uint32_t _Start_Time = millis();
+
+						// Enable GSM Modem Power Switch
+						this->Power_Switch(true);  
+
+						// Power On Delay
+						delay(10);
+
+						// Set Communication Signal LOW
+						this->Communication(true);
+
+						// Communication Delay
+						delay(10);
+
+						// Turn On Modem
+						if (this->PowerMonitor()) {
+
+							// End Function
+							return (true);
+
+						} else {
+
+							// Send On Off Signal
+							this->OnOff(1500);
+
+							// Wait for Power Monitor
+							while (millis() - _Start_Time < 15000) {
+
+								// Control for PWMon (PJ3)
+								if (this->PowerMonitor()) {
+
+									// Wait for Software Ready
+									while (millis() - _Start_Time < 30000) {
+
+										// Control for SWReady (PJ4)
+										if (this->SWReady()) return (true);
+
+										// Wait Delay
+										delay(10);
+
+									}
+
+								}
+
+								// Wait Delay
+								delay(10);
+
+							}
+
+						}
+
+						// End Function
+						return (false);
+
+					}
+
+					// Power OFF Sequence of Modem
+					bool OFF(void) {
+
+						// Turn Off Modem
+						if (this->PowerMonitor()) {
+
+							// Turn Off Modem
+							this->OnOff(2750);
+
+							// Get Start Time
+							const uint32_t _Start_Time = millis();
+
+							// Wait for Power Monitor
+							while (millis() - _Start_Time < 15000) {
+
+								// Control for PowerMonitor
+								if (!this->PowerMonitor()) {
+
+									// Disable GSM Modem Voltage Translator
+									this->Communication(false);
+
+									// Disable GSM Modem Main Power Switch
+									this->Power_Switch(false);  
+
+									// End Function
+									return (true);
+
+								}
+
+							}
+
+							// End Function
+							return (false);
+							
+						} else {
+
+							// Disable GSM Modem Voltage Translator
+							this->Communication(false);
+
+							// Disable GSM Modem Main Power Switch
+							this->Power_Switch(false);  
+
+						}
+
+						// End Function
+						return (true);
+
+					}
+
+				#endif
 
 		};
 
