@@ -11,12 +11,6 @@
 #define LED_WHITE 	        4
 #define LED_YELLOW 	        5
 
-// Serial Name Definitions
-// -----------------------------
-#define SERIAL_TERMINAL		Serial
-#define SERIAL_ENERGY		Serial2
-#define SERIAL_GSM			Serial3
-
 // PCINTx Definitions
 // -----------------------------
 #define INTERRUPT_PCINT0	0

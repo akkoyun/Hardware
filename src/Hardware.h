@@ -51,7 +51,7 @@
 			private:
 
 				// Module Pin Definitions
-				inline void Set_PinOut(void) {
+				void Set_PinOut(void) {
 
 					// Set Module Pin Definitions
 					SET_PIN_OUTPUT_PULLDOWN(RELAY_START);		// Set RELAY_START as Output with Pull-Down
@@ -93,7 +93,7 @@
 				}
 
 				// Module 1 Second Timer
-				inline void AVR_Timer(void) {
+				void AVR_Timer(void) {
 
 					// Set CTC Mod and Rescale (1024)
 					TCCR5A = 0;
@@ -108,7 +108,7 @@
 				}
 
 				// Module INTx Interrupt Function [INT0 or INT1]
-				inline void INTx_Interrupt(uint8_t intNum, bool _State = false, bool _Trigger = false) {
+				void INTx_Interrupt(uint8_t intNum, bool _State = false, bool _Trigger = false) {
 
 					// Control for State
 					if (_State) {
@@ -133,7 +133,7 @@
 				}
 
 				// Module PCIEx Mask Function [PCIE0]
-				inline void PCIEx_Mask(bool _PCIE0 = false, bool _PCIE1 = false, bool _PCIE2 = false) {
+				void PCIEx_Mask(bool _PCIE0 = false, bool _PCIE1 = false, bool _PCIE2 = false) {
 
 					// Define PCICR Mask
 					uint8_t _PCICR_Mask = 0x00;
@@ -149,7 +149,7 @@
 				}
 
 				// PCINTxx Interrupt Function
-				inline void PCINTxx_Interrupt(uint8_t _PCINT, bool _Status = false) {
+				void PCINTxx_Interrupt(uint8_t _PCINT, bool _Status = false) {
 
 					// Set PCINTxx Interrupt
 					if (_PCINT <= 7) {

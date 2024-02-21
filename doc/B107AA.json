@@ -1,0 +1,30 @@
+{
+    "build": {
+        "core": "MegaCore",
+        "extra_flags": "-DARDUINO_AVR_ATmega2560 -DSERIAL_RX_BUFFER_SIZE=128 -DSERIAL_TERMINAL=Serial -DSERIAL_ENERGY=Serial2 -DSERIAL_GSM=Serial3 -D_B107AA_ -D_LE910C1_EUX_ -D_POWERSTAT_ -D_HARDWARE_=\"03.05.00\"",
+        "f_cpu": "7372800L",
+        "mcu": "atmega2560",
+        "variant": "100-pin-arduino-mega",
+        "unflags": "-flto",
+        "board": "ATmega2560"
+    },
+    "frameworks": ["arduino"],
+    "name": "STF B107AA",
+    "upload": {
+        "protocol": "custom",
+        "speed": 115200,
+        "maximum_size": 262144,
+        "maximum_ram_size": 8192,
+        "upload_flags": "-C$PROJECT_PACKAGES_DIR/tool-avrdude/avrdude.conf -p$BOARD_MCU -PUSB -cusbasp",
+        "command": "avrdude -C$PROJECT_PACKAGES_DIR/tool-avrdude/avrdude.conf -p$BOARD_MCU -PUSB -cusbasp -U flash:w:$SOURCE:i"
+    },
+    "platform": "atmelavr",
+    "hardware": {
+        "oscillator": "external",
+        "uart": "no_bootloader",
+        "bod": "disabled",
+        "eesave": "no"
+    },
+    "url": "http://www.stf.com.tr",
+    "vendor": "STF Labs"
+}
