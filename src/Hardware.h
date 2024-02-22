@@ -43,9 +43,12 @@
 		#ifndef __BQ24298__
 			#include <BQ24298.h>
 		#endif
+		#ifndef SdFat_h
+			#include <SdFat.h>
+		#endif
 
 		// Hardware Class
-		class B107AA : public RV3028, public DS28C, public HDC2010, public MAX17055, public BQ24298 {
+		class B107AA : public RV3028, public DS28C, public HDC2010, public MAX17055, public BQ24298, public SdFat {
 
 			// Private Context
 			private:
@@ -231,7 +234,7 @@
 				static B107AA* instance;
 
 				// Module Constructor
-				B107AA(void) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298() {
+				B107AA(void) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298(), SdFat() {
 
 					// Set Pin Out
 					this->Set_PinOut();
@@ -253,6 +256,15 @@
 
 					// Read Register from EEPROM
 					this->Read_Register();
+
+					// Enable SD Multiplexer
+					this->SD_Multiplexer(true);
+
+					// Start SD Card
+					this->begin(53, SD_SCK_MHZ(50));
+
+					// Disable SD Multiplexer
+					this->SD_Multiplexer(false);
 
 					// Read Boot Default Interrupt Status
 					if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {bitSet(Interrupt_Mask, INTERRUPT_MASK_PCINT4);} else {bitClear(Interrupt_Mask, INTERRUPT_MASK_PCINT4);}

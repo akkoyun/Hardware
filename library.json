@@ -22,7 +22,33 @@
 	[
 		{
 			"owner": "akkoyun",
-			"name": "I2C_Functions"
+			"name": "RV3028",
+			"version": "^1.7.0"
+		},
+		{
+			"owner": "akkoyun",
+			"name": "Environment",
+			"version": "^5.8.2"
+		},
+		{
+			"owner": "akkoyun",
+			"name": "MAX17055",
+			"version": "^2.3.3"
+		},
+		{
+			"owner": "akkoyun",
+			"name": "BQ24298",
+			"version": "^2.3.0"
+		},
+		{
+			"owner": "akkoyun",
+			"name": "DS28C",
+			"version": "^1.1.1"
+		},
+		{
+			"owner": "adafruit",
+			"name": "SdFat - Adafruit Fork",
+			"version": "^2.2.3"
 		}
 	],
 	"platforms": [
