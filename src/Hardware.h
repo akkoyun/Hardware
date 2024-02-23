@@ -28,6 +28,9 @@
 		#include "Pinout/B107AA.h"
 
 		// Include Libraries
+		#ifndef __Console__
+			#include <Console.h>
+		#endif
 		#ifndef __RV3028__
 			#include <RV3028.h>
 		#endif
@@ -52,6 +55,9 @@
 
 			// Private Context
 			private:
+
+				// Define Pointers
+				PowerStat_Console* Terminal;
 
 				// Module Pin Definitions
 				void Set_PinOut(void) {
@@ -215,8 +221,59 @@
 
 				}
 
+				// Print Environment Function
+				void Print_Environment(void) {
+
+					// Print T/H Values
+					Terminal->Text(8, 72, _Console_GRAY_, HDC2010::Temperature());
+					Terminal->Text(9, 72, _Console_GRAY_, HDC2010::Humidity());
+
+				}
+
+				// Print Battery Function
+				void Print_Battery(void) {
+
+					// Print Battery Level
+					Terminal->Text(5, 113, _Console_GRAY_, MAX17055::Instant_Voltage());
+					Terminal->Text(6, 112, _Console_GRAY_, MAX17055::IC_Temperature());
+					Terminal->Text(7, 109, _Console_GRAY_, MAX17055::Average_Current());
+					Terminal->Text(8, 112, _Console_GRAY_, MAX17055::State_Of_Charge());
+					Terminal->Text(9, 112, _Console_GRAY_, MAX17055::Instant_Capacity());
+
+					// Print Charger
+					switch (BQ24298::Charge_Status()) {
+
+						case 0: {
+							Terminal->Text(10, 107, _Console_GRAY_, F("Discharge   "));
+							break;
+						}
+
+						case 1: {
+							Terminal->Text(10, 107, _Console_YELLOW_, F("Pre-charge  "));
+							break;
+						}
+
+						case 2: {
+							Terminal->Text(10, 107, _Console_RED_, F("Fast Charge "));
+							break;
+						}
+
+						case 3: {
+							Terminal->Text(10, 107, _Console_GREEN_, F("Charge Done "));
+							break;
+						}
+
+						default:
+							break;
+					}
+
+				}
+
 			// Public Context
 			public:
+
+				// Module Instance
+				static B107AA* instance;
 
 				// Define Register Structure
 				struct Register_Struct {
@@ -230,11 +287,8 @@
 				static uint8_t Interrupt_Mask;
 				static uint8_t Interrupt_Status;
 
-				// Module Instance
-				static B107AA* instance;
-
 				// Module Constructor
-				B107AA(void) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298(), SdFat() {
+				B107AA(PowerStat_Console* _Terminal) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298(), SdFat(), Terminal(_Terminal) {
 
 					// Set Pin Out
 					this->Set_PinOut();
@@ -247,24 +301,152 @@
 				// Begin Function
 				void Begin(void) {
 
-					// Start Objects
-					DS28C::Begin();
-					RV3028::Begin();
-					HDC2010::Begin();
-					MAX17055::Begin();
-					BQ24298::Begin();
+					// Print Firmware Version
+					Terminal->Text(6, 71, _Console_GRAY_, F(_FIRMWARE_));
 
-					// Read Register from EEPROM
-					this->Read_Register();
+					// Print Hardware Version
+					// TODO: board düzeltilecek
+					//Terminal->Text(3, 13, _Console_GRAY_, F(_HARDWARE_);
+
+					// Begin I2C Devices
+					if (RV3028::Begin()) {
+
+						// Print Diagnostic Message
+						Terminal->Text(5, 36, _Console_GREEN_, F("OK"));
+
+					} else {
+
+						// Print Diagnostic Message
+						Terminal->Text(5, 35, _Console_RED_, F("FAIL"));
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+
+					}
+					if (DS28C::Begin()) {
+
+						// Print Diagnostic Message
+						Terminal->Text(6, 36, _Console_GREEN_, F("OK"));
+
+						// Print Serial Number
+						Terminal->Text(5, 63, _Console_GRAY_, DS28C::SerialID);
+
+					} else {
+
+						// Print Diagnostic Message
+						Terminal->Text(6, 35, _Console_RED_, F("FAIL"));
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+
+					}
+					if (HDC2010::Begin()) {
+
+						// Print Diagnostic Message
+						Terminal->Text(7, 36, _Console_GREEN_, F("OK"));
+
+						// Print T/H Values
+						this->Print_Environment();
+
+					} else {
+
+						// Print Diagnostic Message
+						Terminal->Text(7, 35, _Console_RED_, F("FAIL"));
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+
+					}
+					if (MAX17055::Begin()) {
+
+						// Print Diagnostic Message
+						Terminal->Text(8, 36, _Console_GREEN_, F("OK"));
+
+						// Print Battery Level
+						Terminal->Text(5, 113, _Console_GRAY_, MAX17055::Instant_Voltage());
+						Terminal->Text(6, 112, _Console_GRAY_, MAX17055::IC_Temperature());
+						Terminal->Text(7, 109, _Console_GRAY_, MAX17055::Average_Current());
+						Terminal->Text(8, 112, _Console_GRAY_, MAX17055::State_Of_Charge());
+						Terminal->Text(9, 112, _Console_GRAY_, MAX17055::Instant_Capacity());
+
+					} else {
+
+						// Print Diagnostic Message
+						Terminal->Text(8, 35, _Console_RED_, F("FAIL"));
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+
+					}
+					if (BQ24298::Begin()) {
+
+						// Print Diagnostic Message
+						Terminal->Text(9, 36, _Console_GREEN_, F("OK"));
+
+						// Print Charger
+						switch (BQ24298::Charge_Status()) {
+
+							case 0: {
+								Terminal->Text(10, 107, _Console_GRAY_, F("Discharge   "));
+								break;
+							}
+
+							case 1: {
+								Terminal->Text(10, 107, _Console_YELLOW_, F("Pre-charge  "));
+								break;
+							}
+
+							case 2: {
+								Terminal->Text(10, 107, _Console_RED_, F("Fast Charge "));
+								break;
+							}
+
+							case 3: {
+								Terminal->Text(10, 107, _Console_GREEN_, F("Charge Done "));
+								break;
+							}
+
+							default:
+								break;
+						}
+
+					} else {
+
+						// Print Diagnostic Message
+						Terminal->Text(9, 35, _Console_RED_, F("FAIL"));
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+
+					}
 
 					// Enable SD Multiplexer
 					this->SD_Multiplexer(true);
 
 					// Start SD Card
-					this->begin(53, SD_SCK_MHZ(50));
+					if (!SdFat::begin(53, SD_SCK_MHZ(50))) {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+
+					}
 
 					// Disable SD Multiplexer
 					this->SD_Multiplexer(false);
+
+
+
+
+
+
+
+
+
+
+
+					// Read Register from EEPROM
+					this->Read_Register();
+
 
 					// Read Boot Default Interrupt Status
 					if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {bitSet(Interrupt_Mask, INTERRUPT_MASK_PCINT4);} else {bitClear(Interrupt_Mask, INTERRUPT_MASK_PCINT4);}
@@ -785,144 +967,247 @@
 					// Turn OFF HeartBeat
 					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);
 
+					// Control for Display Interrupt
+					if (this->INT_DISPLAY(true)) {
+
+						// Print Terminal Text
+						Console.Text(2, 13, _Console_GREEN_, RV3028::UNIX_Time(UNIX_GET));
+
+						// Print Environment
+						this->Print_Environment();
+
+						// Print Battery
+						this->Print_Battery();
+
+					}
+
+					// Control for Environment Interrupt
+					if (this->INT_ENVIRONMENT(true)) {
+
+						// Read TH Interrupt Status
+						uint8_t _TH_Status = HDC2010::Read_Interrupt_Status();
+
+						// Control for Interrupt
+						if (bitRead(_TH_Status, 5) or bitRead(_TH_Status, 6)) {
+
+							// Set Status Interrupt
+							bitSet(this->Register.Status, __STATUS_SYSTEM__);
+							
+						} else {
+							
+							// Clear Status Interrupt
+							bitClear(this->Register.Status, __STATUS_SYSTEM__);
+							
+						}
+
+					}
+
 				}
 
 				// GSM Functions
 				// -------------
 
-				#if defined(_LE910C1_EUX_)
+				// Set Interrupt
+				void Set_GSM_Interrupt(void) {
 
-					// Power Switch
-					inline void Power_Switch(const bool _State = false) {
+					// Set Interrupt Mask
+					this->PCIEx_Mask(false, true, false);
 
-						// Control for _State
-						if (_State) {
+					// Enable GSM Ring Interrupt
+					this->PCINTxx_Interrupt(11, true);
 
-							// Set PIN_EN_3V8 pin HIGH
-							PORT_EN_3V8 |= (1 << PIN_EN_3V8);
+				}
+
+				// Power Switch
+				void Power_Switch(const bool _State = false) {
+
+					// Control for _State
+					if (_State) {
+
+						// Set PIN_EN_3V8 pin HIGH
+						PORT_EN_3V8 |= (1 << PIN_EN_3V8);
 
 
-						} else {
+					} else {
 
-							// Set PIN_EN_3V8 pin LOW
-							PORT_EN_3V8 &= ~(1 << PIN_EN_3V8);
+						// Set PIN_EN_3V8 pin LOW
+						PORT_EN_3V8 &= ~(1 << PIN_EN_3V8);
+
+					}
+
+				}
+
+				// Enable Communication Buffer.
+				void Communication(const bool _State = false) {
+
+					// Control for _State
+					if (_State) {
+
+						// Set GSM_COMM_EN pin LOW
+						PORT_GSM_COMM_EN &= ~(1 << PIN_GSM_COMM_EN);
+
+					} else {
+
+						// Set GSM_COMM_EN pin HIGH
+						PORT_GSM_COMM_EN |= (1 << PIN_GSM_COMM_EN);
+
+					}
+
+				}
+
+				// On or Off Modem.
+				void OnOff(const uint16_t _Time = 1500) {
+
+					// Set PIN_GSM_ONOFF Signal HIGH
+					PORT_GSM_ONOFF |= (1 << PIN_GSM_ONOFF);
+
+					// Print Progress Bar
+					for (uint8_t i = 84; i < 120; i++) {
+
+						// Print Progress Bar
+						Terminal->Text(21, i, _Console_GRAY_, F("█"));
+
+						// Command Delay
+						delay(_Time / 35);
+
+					}
+
+					// Clear Progress Bar
+					Terminal->Text(21, 84, _Console_CYAN_, F("                                    "));
+
+					// Set PIN_GSM_ONOFF Signal LOW
+					PORT_GSM_ONOFF &= ~(1 << PIN_GSM_ONOFF);
+
+				}
+
+				// ShutDown Modem
+				void ShutDown(const uint16_t _Time) {
+
+					// Set PIN_GSM_SDOWN Signal HIGH
+					PORT_GSM_SDOWN |= (1 << PIN_GSM_SDOWN);
+
+					// Command Delay
+					delay(_Time);
+
+					// Set PIN_GSM_SDOWN Signal LOW
+					PORT_GSM_SDOWN &= ~(1 << PIN_GSM_SDOWN);
+
+				}
+
+				// Get Power Monitor
+				bool PowerMonitor(void) {
+
+					// Return Power Monitor
+					return (bitRead(PIN_REGISTER_GSM_PMON, PIN_GSM_PMON));
+
+				}
+
+				// Get Software Ready
+				bool SWReady(void) {
+
+					// Return Software Ready
+					return (bitRead(PIN_REGISTER_GSM_SWREADY, PIN_GSM_SWREADY));
+
+				}
+
+				// Power ON Sequence of Modem
+				bool ON(void) {
+
+					// Get Start Time
+					const uint32_t _Start_Time = millis();
+
+					// Enable GSM Modem Power Switch
+					this->Power_Switch(true);  
+
+					// Power On Delay
+					delay(10);
+
+					// Set Communication Signal LOW
+					this->Communication(true);
+
+					// Communication Delay
+					delay(10);
+
+					// Turn On Modem
+					if (this->PowerMonitor()) {
+
+						// End Function
+						return (true);
+
+					} else {
+
+						// Print Message
+						Terminal->Show_Message(_Console_CYAN_, F("Powering ON GSM Modem..."));
+
+						// Send On Off Signal
+						this->OnOff(1500);
+
+						// Print Message
+						Terminal->Show_Message(_Console_CYAN_, F("Waiting for Power Monitor..."));
+
+						// Wait for Power Monitor
+						while (millis() - _Start_Time < 15000) {
+
+							// Control for PWMon (PJ3)
+							if (this->PowerMonitor()) {
+
+								// Print Message
+								Terminal->Show_Message(_Console_CYAN_, F("Waiting for Ready..."));
+
+								// Wait for Software Ready
+								while (millis() - _Start_Time < 30000) {
+
+									// Control for SWReady (PJ4)
+									if (this->SWReady()) return (true);
+
+									// Wait Delay
+									delay(10);
+
+								}
+
+							}
+
+							// Wait Delay
+							delay(10);
 
 						}
 
 					}
 
-					// Enable Communication Buffer.
-					inline void Communication(const bool _State = false) {
+					// End Function
+					return (false);
 
-						// Control for _State
-						if (_State) {
+				}
 
-							// Set GSM_COMM_EN pin LOW
-							PORT_GSM_COMM_EN &= ~(1 << PIN_GSM_COMM_EN);
+				// Power OFF Sequence of Modem
+				bool OFF(void) {
 
-						} else {
+					// Print Message
+					Terminal->Show_Message(_Console_CYAN_, F("Powering OFF GSM Modem..."));
 
-							// Set GSM_COMM_EN pin HIGH
-							PORT_GSM_COMM_EN |= (1 << PIN_GSM_COMM_EN);
+					// Turn Off Modem
+					if (this->PowerMonitor()) {
 
-						}
-
-					}
-
-					// On or Off Modem.
-					inline void OnOff(const uint16_t _Time = 1500) {
-
-						// Set PIN_GSM_ONOFF Signal HIGH
-						PORT_GSM_ONOFF |= (1 << PIN_GSM_ONOFF);
-
-						// Command Delay
-						delay(_Time);					
-
-						// Set PIN_GSM_ONOFF Signal LOW
-						PORT_GSM_ONOFF &= ~(1 << PIN_GSM_ONOFF);
-
-					}
-
-					// ShutDown Modem
-					inline void ShutDown(const uint16_t _Time) {
-
-						// Set PIN_GSM_SDOWN Signal HIGH
-						PORT_GSM_SDOWN |= (1 << PIN_GSM_SDOWN);
-
-						// Command Delay
-						delay(_Time);
-
-						// Set PIN_GSM_SDOWN Signal LOW
-						PORT_GSM_SDOWN &= ~(1 << PIN_GSM_SDOWN);
-
-					}
-
-					// Get Power Monitor
-					inline bool PowerMonitor(void) {
-
-						// Return Power Monitor
-						return (bitRead(PIN_REGISTER_GSM_PMON, PIN_GSM_PMON));
-
-					}
-
-					// Get Software Ready
-					inline bool SWReady(void) {
-
-						// Return Software Ready
-						return (bitRead(PIN_REGISTER_GSM_SWREADY, PIN_GSM_SWREADY));
-
-					}
-
-					// Power ON Sequence of Modem
-					bool ON(void) {
+						// Turn Off Modem
+						this->OnOff(2750);
 
 						// Get Start Time
 						const uint32_t _Start_Time = millis();
 
-						// Enable GSM Modem Power Switch
-						this->Power_Switch(true);  
+						// Wait for Power Monitor
+						while (millis() - _Start_Time < 15000) {
 
-						// Power On Delay
-						delay(10);
+							// Control for PowerMonitor
+							if (!this->PowerMonitor()) {
 
-						// Set Communication Signal LOW
-						this->Communication(true);
+								// Disable GSM Modem Voltage Translator
+								this->Communication(false);
 
-						// Communication Delay
-						delay(10);
+								// Disable GSM Modem Main Power Switch
+								this->Power_Switch(false);  
 
-						// Turn On Modem
-						if (this->PowerMonitor()) {
-
-							// End Function
-							return (true);
-
-						} else {
-
-							// Send On Off Signal
-							this->OnOff(1500);
-
-							// Wait for Power Monitor
-							while (millis() - _Start_Time < 15000) {
-
-								// Control for PWMon (PJ3)
-								if (this->PowerMonitor()) {
-
-									// Wait for Software Ready
-									while (millis() - _Start_Time < 30000) {
-
-										// Control for SWReady (PJ4)
-										if (this->SWReady()) return (true);
-
-										// Wait Delay
-										delay(10);
-
-									}
-
-								}
-
-								// Wait Delay
-								delay(10);
+								// End Function
+								return (true);
 
 							}
 
@@ -930,59 +1215,21 @@
 
 						// End Function
 						return (false);
+						
+					} else {
+
+						// Disable GSM Modem Voltage Translator
+						this->Communication(false);
+
+						// Disable GSM Modem Main Power Switch
+						this->Power_Switch(false);  
 
 					}
 
-					// Power OFF Sequence of Modem
-					bool OFF(void) {
+					// End Function
+					return (true);
 
-						// Turn Off Modem
-						if (this->PowerMonitor()) {
-
-							// Turn Off Modem
-							this->OnOff(2750);
-
-							// Get Start Time
-							const uint32_t _Start_Time = millis();
-
-							// Wait for Power Monitor
-							while (millis() - _Start_Time < 15000) {
-
-								// Control for PowerMonitor
-								if (!this->PowerMonitor()) {
-
-									// Disable GSM Modem Voltage Translator
-									this->Communication(false);
-
-									// Disable GSM Modem Main Power Switch
-									this->Power_Switch(false);  
-
-									// End Function
-									return (true);
-
-								}
-
-							}
-
-							// End Function
-							return (false);
-							
-						} else {
-
-							// Disable GSM Modem Voltage Translator
-							this->Communication(false);
-
-							// Disable GSM Modem Main Power Switch
-							this->Power_Switch(false);  
-
-						}
-
-						// End Function
-						return (true);
-
-					}
-
-				#endif
+				}
 
 		};
 
