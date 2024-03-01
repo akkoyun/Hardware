@@ -288,7 +288,7 @@
 				static uint8_t Interrupt_Status;
 
 				// Module Constructor
-				B107AA(PowerStat_Console* _Terminal) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298(), SdFat(), Terminal(_Terminal) {
+				explicit B107AA(PowerStat_Console* _Terminal) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298(), SdFat(), Terminal(_Terminal) {
 
 					// Set Pin Out
 					this->Set_PinOut();
@@ -689,6 +689,26 @@
 
 					// SD Wait Delay
 					delay(200);
+
+				}
+
+				// FOTA Power Function
+				void Burn_Firmware(void) {
+
+					// Disable SD Multiplexer
+					this->SD_Multiplexer(false);
+
+					// Wait for 50ms
+					delay(50);
+
+					// Enable FOTA Power
+					PORT_FOTA_POWER_EN |= (1 << PIN_FOTA_POWER_EN);
+
+					// Wait for 50ms		
+					delay(50);
+
+					// Disable FOTA Power		
+					PORT_FOTA_POWER_EN &= ~(1 << PIN_FOTA_POWER_EN);
 
 				}
 
