@@ -712,6 +712,46 @@
 
 				}
 
+				// Relay Functions
+				// ---------------
+
+				void Relay(bool _Relay = RELAY_START, bool _Lock = RELAY_UNLOCK, uint16_t _Delay = 500) {
+
+					// Start Relay
+					if (_Relay) {
+
+						// Set RELAY_START
+						PORT_RELAY_START |= (1 << PIN_RELAY_START);
+
+						// Work Delay
+						delay(_Delay);
+
+						// Clear RELAY_START
+						PORT_RELAY_START &= ~(1 << PIN_RELAY_START);
+
+					} else {
+
+						// Set RELAY_STOP
+						PORT_RELAY_STOP |= (1 << PIN_RELAY_STOP);
+
+						// Work Delay
+						delay(_Delay);
+
+						// Control for Lock
+						if (!_Lock) {
+
+							// Clear RELAY_STOP
+							PORT_RELAY_STOP &= ~(1 << PIN_RELAY_STOP);
+
+						}
+
+					}
+
+
+
+
+				}
+
 				// ISR Handler Functions
 				// ---------------------
 
