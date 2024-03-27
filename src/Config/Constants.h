@@ -45,22 +45,23 @@
 #define INTERRUPT_PCINT22									(uint8_t)22
 #define INTERRUPT_PCINT23									(uint8_t)23
 
-// Interrupt Mask Definitions
-// -----------------------------
-#define INTERRUPT_MASK_PCINT4								(uint8_t)0
-#define INTERRUPT_MASK_PCINT5								(uint8_t)1
-#define INTERRUPT_MASK_PCINT6								(uint8_t)2
-#define INTERRUPT_MASK_PCINT7								(uint8_t)3
-#define INTERRUPT_TERMINAL_SENSE							(uint8_t)6
-#define INTERRUPT_TERMINAL_START							(uint8_t)7
-
 // Interrupt Definitions
 // ---------------------
-#define INTERRUPT_DISPLAY									(uint8_t)0
-#define INTERRUPT_ENERGY									(uint8_t)1
-#define INTERRUPT_ENVIRONMENT								(uint8_t)2
-#define INTERRUPT_RS485										(uint8_t)3
-#define INTERRUPT_RTC										(uint8_t)4
+#define INTERRUPT_TIMER										(uint8_t)0
+#define INTERRUPT_DISPLAY									(uint8_t)1
+#define INTERRUPT_ENERGY_1									(uint8_t)2
+#define INTERRUPT_ENERGY_2									(uint8_t)3
+#define INTERRUPT_ENVIRONMENT								(uint8_t)4
+#define INTERRUPT_RTC										(uint8_t)5
+#define INTERRUPT_RS485										(uint8_t)6
+#define INTERRUPT_TERMINAL_SENSE							(uint8_t)14
+#define INTERRUPT_TERMINAL_START							(uint8_t)15
+
+// Status Definitions
+// ---------------------
+#define REGISTER_STATUS										(uint8_t)1
+#define REGISTER_PUBLISH									(uint8_t)2
+#define REGISTER_STOP										(uint8_t)3
 
 // EEPROM Definitions
 // -----------------------------

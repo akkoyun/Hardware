@@ -59,6 +59,12 @@
 				// Define Pointers
 				PowerStat_Console* Terminal;
 
+				// Define Interrupt Structure
+				struct Interrupt_Struct {
+					uint16_t Status = 0;
+					uint16_t Buffer = 0;
+				} Interrupt;
+
 				// Module Pin Definitions
 				void Set_PinOut(void) {
 
@@ -100,6 +106,9 @@
 					SET_PIN_OUTPUT_PULLDOWN(HEARTBEAT);			// Set HEARTBEAT as Output with Pull-Down
 
 				}
+
+				// Interrupt Handler Function
+				// --------------------------
 
 				// Module 1 Second Timer
 				void AVR_Timer(void) {
@@ -210,6 +219,9 @@
 
 				}
 
+				// EEPROM Functions
+				// ----------------
+
 				// Read PUBLISH Register from EEPROM Function
 				void Read_Register(void) {
 
@@ -220,6 +232,54 @@
 					this->Register.Stop = (((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_2__) << 24) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_1__) << 16) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_2__) << 8) | (uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_1__));
 
 				}
+
+				// Terminal Functions
+				// ------------------
+
+				// Terminal Display Controller
+				void Terminal_Control(void) {
+
+					// Control for Terminal Sense
+					#if defined(_DEBUG_)
+
+						// Control for Terminal Sense
+						if (bitRead(PIN_REGISTER_TERMINAL_SENSE, PIN_TERMINAL_SENSE)) {
+
+							// End Serial Stream
+							if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_START)) {
+
+								// End Serial Stream
+								Serial.end();
+
+								// Set Terminal Variable
+								bitClear(this->Interrupt.Status, INTERRUPT_TERMINAL_START);
+
+							}
+
+						} else {
+
+							// Start Serial Stream
+							if (!bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_START)) {
+
+								// Start Serial Stream
+								Serial.begin(115200);
+
+								// Set Terminal Variable
+								bitSet(this->Interrupt.Status, INTERRUPT_TERMINAL_START);
+
+							}
+
+							// Set Terminal Variable
+							bitSet(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE);
+
+						}
+
+					#endif
+
+				}
+
+				// Terminal Display Function
+				// -------------------------
 
 				// Print Environment Function
 				void Print_Environment(void) {
@@ -269,6 +329,205 @@
 
 				}
 
+				// Handle Input Functions
+				// ----------------------
+
+				// Handle Input Functions
+				bool Phase_R(const uint8_t _Port_Buffer) {
+
+					// Handle Phase R Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_R__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PHASE_R__);
+
+						// End Function
+						return true;
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PHASE_R__);
+
+						// End Function
+						return false;
+
+					}
+
+				}
+				bool Phase_S(const uint8_t _Port_Buffer) {
+
+					// Handle Phase S Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_S__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PHASE_S__);
+
+						// End Function
+						return true;
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PHASE_S__);
+
+						// End Function
+						return false;
+
+					}
+
+				}
+				bool Phase_T(const uint8_t _Port_Buffer) {
+
+					// Handle Phase T Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_T__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PHASE_T__);
+
+						// End Function
+						return true;
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PHASE_T__);
+
+						// End Function
+						return false;
+
+					}
+
+				}
+				bool Thermic_Fault(const uint8_t _Port_Buffer) {
+
+					// Handle Thermic Fault Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_TH__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_TH__);
+
+						// End Function
+						return true;
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_FAULT_TH__);
+
+						// End Function
+						return false;
+
+					}
+
+				}
+				bool Motor_Protection_Relay(const uint8_t _Port_Buffer) {
+
+					// Handle Motor Protection Relay Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_MP__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_MP__);
+
+						// End Function
+						return true;
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_FAULT_MP__);
+
+						// End Function
+						return false;
+
+					}
+
+				}
+				bool Pump_Status(const uint8_t _Port_Buffer) {
+
+					// Handle for Pump Status
+					if (bitRead(_Port_Buffer, __INPUT_PIN_M1__) && bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_PUMP__);
+
+						// End Function
+						return true;
+
+					} else {
+
+						// Set Status Register
+						bitClear(this->Register.Status, __STATUS_PUMP__);
+
+						// End Function
+						return false;
+
+					}
+
+				}
+				bool System_Anomaly(const uint8_t _Port_Buffer) {
+
+					// Just M1 Active
+					if ((bitRead(_Port_Buffer, __INPUT_PIN_M1__) && !bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__))) { 
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+
+					} 
+					
+					// Just M2 Active
+					else if (!bitRead(_Port_Buffer, __INPUT_PIN_M1__) && bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+
+					}
+
+					// Just M3 Active
+					else if (!bitRead(_Port_Buffer, __INPUT_PIN_M1__) && !bitRead(_Port_Buffer, __INPUT_PIN_M2__) && bitRead(_Port_Buffer, __INPUT_PIN_M3__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+
+					}
+
+					// Pump Active and TH Active
+					else if (bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, __INPUT_PIN_TH__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+
+					}
+
+					// Pump Active and MP Active
+					else if (bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, __INPUT_PIN_MP__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+
+					}
+
+					// All Phases Active and MP Active
+					else if (bitRead(this->Register.Status, __STATUS_PHASE_R__) && bitRead(this->Register.Status, __STATUS_PHASE_S__) && bitRead(this->Register.Status, __STATUS_PHASE_T__) && bitRead(_Port_Buffer, __INPUT_PIN_MP__)) {
+
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+
+					} 
+	
+					// No Anomaly
+					else {
+
+						// Clear Status Register
+						bitClear(this->Register.Status, __STATUS_FAULT_SA__);
+
+					}
+
+					// End Function
+					return (bitRead(_Port_Buffer, __STATUS_FAULT_SA__));
+
+				}
+
 			// Public Context
 			public:
 
@@ -283,15 +542,17 @@
 					uint32_t Stop = 0;
 				} Register;
 
-				// Define Interrupt Variables
-				uint8_t Interrupt_Mask;
-				uint8_t Interrupt_Status;
+				
 
 				// Module Constructor
 				explicit B107AA(PowerStat_Console* _Terminal) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298(), SdFat(), Terminal(_Terminal) {
 
 					// Set Pin Out
 					this->Set_PinOut();
+
+					// Clear Interrupt Variables
+					this->Interrupt.Status = 0;
+					this->Interrupt.Buffer = 0;
 
 					// Set Instance
 					instance = this;
@@ -301,12 +562,15 @@
 				// Begin Function
 				void Begin(void) {
 
+					// Control for Terminal
+					this->Terminal_Control();
+
 					// Print Firmware Version
 					Terminal->Text(6, 71, _Console_GRAY_, F(_FIRMWARE_));
 
 					// Print Hardware Version
 					// TODO: board düzeltilecek
-					//Terminal->Text(3, 13, _Console_GRAY_, F(_HARDWARE_);
+					//Terminal->Text(7, 71, _Console_GRAY_, F(_HARDWARE_));
 
 					// Begin I2C Devices
 					if (RV3028::Begin()) {
@@ -320,7 +584,7 @@
 						Terminal->Text(5, 35, _Console_RED_, F("FAIL"));
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+						bitSet(this->Register.Status, __STATUS_SYSTEM__);
 
 					}
 					if (DS28C::Begin()) {
@@ -337,7 +601,7 @@
 						Terminal->Text(6, 35, _Console_RED_, F("FAIL"));
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+						bitSet(this->Register.Status, __STATUS_SYSTEM__);
 
 					}
 					if (HDC2010::Begin()) {
@@ -354,7 +618,7 @@
 						Terminal->Text(7, 35, _Console_RED_, F("FAIL"));
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+						bitSet(this->Register.Status, __STATUS_SYSTEM__);
 
 					}
 					if (MAX17055::Begin()) {
@@ -375,7 +639,7 @@
 						Terminal->Text(8, 35, _Console_RED_, F("FAIL"));
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+						bitSet(this->Register.Status, __STATUS_SYSTEM__);
 
 					}
 					if (BQ24298::Begin()) {
@@ -416,7 +680,7 @@
 						Terminal->Text(9, 35, _Console_RED_, F("FAIL"));
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+						bitSet(this->Register.Status, __STATUS_SYSTEM__);
 
 					}
 
@@ -427,40 +691,88 @@
 					if (!SdFat::begin(53, SD_SCK_MHZ(50))) {
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_SYSTEM__);
+						bitSet(this->Register.Status, __STATUS_SYSTEM__);
 
 					}
 
 					// Disable SD Multiplexer
 					this->SD_Multiplexer(false);
 
-
-
-
-
-
-
-
-
-
-
 					// Read Register from EEPROM
 					this->Read_Register();
 
-
 					// Read Boot Default Interrupt Status
-					if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {bitSet(this->Interrupt_Mask, INTERRUPT_MASK_PCINT4);} else {bitClear(this->Interrupt_Mask, INTERRUPT_MASK_PCINT4);}
-					if (bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {bitSet(this->Interrupt_Mask, INTERRUPT_MASK_PCINT5);} else {bitClear(this->Interrupt_Mask, INTERRUPT_MASK_PCINT5);}
-					if (bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {bitSet(this->Interrupt_Mask, INTERRUPT_MASK_PCINT6);} else {bitClear(this->Interrupt_Mask, INTERRUPT_MASK_PCINT6);}
-					if (bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {bitSet(this->Interrupt_Mask, INTERRUPT_MASK_PCINT7);} else {bitClear(this->Interrupt_Mask, INTERRUPT_MASK_PCINT7);}
+					if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
+						
+						// Set Energy 1 Interrupt
+						bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
 
-					// Set Interrupt Updater
-					if (bitRead(this->Interrupt_Mask, INTERRUPT_MASK_PCINT4) && bitRead(this->Interrupt_Mask, INTERRUPT_MASK_PCINT5)) {bitSet(this->Interrupt_Status, INTERRUPT_ENERGY);} else {bitClear(this->Interrupt_Status, INTERRUPT_ENERGY);}
-					if (bitRead(this->Interrupt_Mask, INTERRUPT_MASK_PCINT6)) {bitSet(this->Interrupt_Status, INTERRUPT_ENVIRONMENT);} else {bitClear(this->Interrupt_Status, INTERRUPT_ENVIRONMENT);}
-					if (bitRead(this->Interrupt_Mask, INTERRUPT_MASK_PCINT7)) {bitSet(this->Interrupt_Status, INTERRUPT_RTC);} else {bitClear(this->Interrupt_Status, INTERRUPT_RTC);}
+						// Clear Energy 1 Interrupt
+						bitClear(this->Interrupt.Status, INTERRUPT_ENERGY_1);
+						
+					} else {
+						
+						// Clear Energy 1 Interrupt
+						bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
+
+						// Set Energy 1 Interrupt Status
+						bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_1);
+						
+					}
+					if (bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
+						
+						// Set Energy 2 Interrupt
+						bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
+
+						// Clear Energy 2 Interrupt
+						bitClear(this->Interrupt.Status, INTERRUPT_ENERGY_2);
+						
+					} else {
+						
+						// Clear Energy 2 Interrupt
+						bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
+
+						// Set Energy 2 Interrupt Status
+						bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_2);
+						
+					}
+					if (bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
+						
+						// Set Environment Interrupt
+						bitSet(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+
+						// Clear Environment Interrupt
+						bitClear(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
+						
+					} else {
+						
+						// Clear Environment Interrupt
+						bitClear(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+
+						// Set Environment Interrupt Status
+						bitSet(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
+						
+					}
+					if (bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
+						
+						// Set RTC Interrupt
+						bitSet(this->Interrupt.Buffer, INTERRUPT_RTC);
+
+						// Clear RTC Interrupt
+						bitClear(this->Interrupt.Status, INTERRUPT_RTC);
+						
+					} else {
+						
+						// Clear RTC Interrupt
+						bitClear(this->Interrupt.Buffer, INTERRUPT_RTC);
+
+						// Set RTC Interrupt Status
+						bitSet(this->Interrupt.Status, INTERRUPT_RTC);
+						
+					}
 
 					// Control for Inputs
-					this->Read_Inputs();
+					this->PCMSK2_Handler();
 
 					// Disable Interrupts
 					cli();
@@ -492,179 +804,6 @@
 
 					// Enable Interrupts
 					sei();
-
-				}
-
-				// Terminal Functions
-				// ------------------
-
-				// Terminal Display Controller
-				bool Terminal_Control(void) {
-
-					// Control for Terminal Sense
-					#if defined(_DEBUG_)
-
-						// Set Terminal Sense Variable	
-						if (bitRead(PIN_REGISTER_TERMINAL_SENSE, PIN_TERMINAL_SENSE)) {
-
-							// End Serial Stream
-							if (bitSet(Interrupt_Mask, INTERRUPT_TERMINAL_START)) {
-
-								// End Serial Stream
-								Serial.end();
-
-								// Set Terminal Variable
-								bitClear(Interrupt_Mask, INTERRUPT_TERMINAL_START);
-
-							}
-
-							// End Function
-							return(false);
-
-						} else {
-
-							// Start Serial Stream
-							if (!bitRead(Interrupt_Mask, INTERRUPT_TERMINAL_START)) {
-
-								// Start Serial Stream
-								Serial.begin(115200);
-
-								// Set Terminal Variable
-								bitSet(Interrupt_Mask, INTERRUPT_TERMINAL_START);
-
-							}
-
-							// End Function
-							return(true);
-
-						}
-
-					#endif
-
-					// End Function
-					return(false);
-
-				}
-
-				// Input Control Functions
-				// -----------------------
-
-				// Static Read Inputs Function
-			    static void Read_Inputs_Static(void) {
-
-					// Control for Instance
-			        if (instance) {
-
-						// Read Inputs
-            			instance->Read_Inputs();
-
-        			}
-
-    			}
-
-				// Read Input Signal Function
-				void Read_Inputs(void) {
-
-					// Set Input Port Variables
-					uint8_t _Port_Buffer = PINK;
-
-					// Handle Phase R Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_R__)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PHASE_R__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PHASE_R__);
-
-					}
-
-					// Handle Phase S Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_S__)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PHASE_S__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PHASE_S__);
-
-					}
-
-					// Handle Phase T Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_T__)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PHASE_T__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PHASE_T__);
-
-					}
-
-					// Handle Thermic Relay Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_TH__)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_TH__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_FAULT_TH__);
-
-					}
-
-					// Handle Motor Protection Relay Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_MP__)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_MP__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_FAULT_MP__);
-
-					}
-
-					// Handle for Pump Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_M1__) && bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PUMP__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PUMP__);
-
-					}
-
-					// Handle for System Anomaly Status
-					if (
-						(bitRead(_Port_Buffer, __INPUT_PIN_M1__) && !bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__)) || 																		// Just M1 Active
-						(!bitRead(_Port_Buffer, __INPUT_PIN_M1__) && bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__)) || 																		// Just M2 Active
-						(!bitRead(_Port_Buffer, __INPUT_PIN_M1__) && !bitRead(_Port_Buffer, __INPUT_PIN_M2__) && bitRead(_Port_Buffer, __INPUT_PIN_M3__)) || 																		// Just M3 Active
-						(bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, __INPUT_PIN_TH__)) || 																											// Pump Active and TH Active
-						(bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, __INPUT_PIN_MP__)) || 																											// Pump Active and MP Active
-						(bitRead(this->Register.Status, __STATUS_PHASE_R__) && bitRead(this->Register.Status, __STATUS_PHASE_S__) && bitRead(this->Register.Status, __STATUS_PHASE_T__) && bitRead(_Port_Buffer, __INPUT_PIN_MP__))	// All Phases Active and MP Active
-					) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
-
-					} else {
-
-						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_FAULT_SA__);
-
-					}
 
 				}
 
@@ -764,8 +903,11 @@
 				}
 				void TIMER5_Handler(void) {
 
-					// Set Display Interrupts
-					bitSet(this->Interrupt_Status, INTERRUPT_DISPLAY);
+					// Set Timer Interrupt
+					bitSet(this->Interrupt.Status, INTERRUPT_TIMER);
+
+					// Set Display Interrupt
+					bitSet(this->Interrupt.Status, INTERRUPT_DISPLAY);
 
 				}
 
@@ -779,7 +921,7 @@
 				void INT4_Handler(void) {
 
 					// Set RS485 Interrupt
-					bitSet(Interrupt_Status, INTERRUPT_RS485);
+					bitSet(this->Interrupt.Status, INTERRUPT_RS485);
 
 				}
 
@@ -793,110 +935,236 @@
 				void PCMSK0_Handler(void) {
 
 					// Control for ENERGY Interrupt
-					if (bitRead(this->Interrupt_Mask, INTERRUPT_MASK_PCINT4) != bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
+					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENERGY_1) != bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
 
-						// Set ENERGY Interrupt
-						if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {bitSet(this->Interrupt_Mask, INTERRUPT_MASK_PCINT4);} else {bitClear(this->Interrupt_Mask, INTERRUPT_MASK_PCINT4);}
+						// Set ENERGY 1 Interrupt
+						if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
 
-						// Set ENERGY Interrupt
-						bitSet(this->Interrupt_Status, INTERRUPT_ENERGY);
+							// Set ENERGY 1 Interrupt Mask
+							bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
+							
+						} else {
+							
+							// Clear ENERGY 1 Interrupt Mask
+							bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
+
+							// Set ENERGY 1 Interrupt
+							bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_1);
+
+						}
 
 					}
 
 					// Control for ENERGY Interrupt
-					if (bitRead(this->Interrupt_Mask, INTERRUPT_MASK_PCINT5) != bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
+					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENERGY_2) != bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
 
 						// Set ENERGY Interrupt
-						if (bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {bitSet(this->Interrupt_Mask, INTERRUPT_MASK_PCINT5);} else {bitClear(this->Interrupt_Mask, INTERRUPT_MASK_PCINT5);}
+						if (bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
 
-						// Set ENERGY Interrupt
-						bitSet(this->Interrupt_Status, INTERRUPT_ENERGY);
+							// Set ENERGY Interrupt Mask
+							bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
+							
+						} else {
+							
+							// Clear ENERGY Interrupt Mask
+							bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
+
+							// Set ENERGY Interrupt
+							bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_2);
+
+						}
 
 					}
 
 					// Control for ENVIRONMENT Interrupt
-					if (bitRead(this->Interrupt_Mask, INTERRUPT_MASK_PCINT6) != bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
+					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT) != bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
 
 						// Set ENVIRONMENT Interrupt
-						if (bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {bitSet(this->Interrupt_Mask, INTERRUPT_MASK_PCINT6);} else {bitClear(this->Interrupt_Mask, INTERRUPT_MASK_PCINT6);}
+						if (bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
 
-						// Set ENVIRONMENT Interrupt
-						bitSet(this->Interrupt_Status, INTERRUPT_ENVIRONMENT);
+							// Set ENVIRONMENT Interrupt Mask	
+							bitSet(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+
+						} else {
+							
+							// Clear ENVIRONMENT Interrupt Mask
+							bitClear(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+
+							// Set ENVIRONMENT Interrupt
+							bitSet(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
+
+						}
 
 					}
 
 					// Control for RTC Interrupt
-					if (bitRead(this->Interrupt_Mask, INTERRUPT_MASK_PCINT7) != bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
+					if (bitRead(this->Interrupt.Buffer, INTERRUPT_RTC) != bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
 
 						// Set RTC Interrupt
-						if (!bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {bitSet(this->Interrupt_Mask, INTERRUPT_MASK_PCINT7);} else {bitClear(this->Interrupt_Mask, INTERRUPT_MASK_PCINT7);}
+						if (bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
+							
+							// Set RTC Interrupt Mask
+							bitSet(this->Interrupt.Buffer, INTERRUPT_RTC);
+							
+						} else {
 
-						// Set RTC Interrupt
-						bitSet(this->Interrupt_Status, INTERRUPT_RTC);
+							// Clear RTC Interrupt Mask
+							bitClear(this->Interrupt.Buffer, INTERRUPT_RTC);
+
+							// Set RTC Interrupt
+							bitSet(this->Interrupt.Status, INTERRUPT_RTC);
+
+						}
 
 					}
 
 				}
 
+				// Static Read Inputs Function
+			    static void PCMSK2_Handler_Static(void) {
+
+					// Control for Instance
+			        if (instance) {
+
+						// Read Inputs
+            			instance->PCMSK2_Handler();
+
+        			}
+
+    			}
+				void PCMSK2_Handler(void) {
+
+					// Set Input Port Variables
+					uint8_t _Port_Buffer = PINK;
+
+					// Handle Phase Status
+					this->Phase_R(_Port_Buffer);
+					this->Phase_S(_Port_Buffer);
+					this->Phase_T(_Port_Buffer);
+
+					// Handle Defect Status
+					this->Thermic_Fault(_Port_Buffer);
+					this->Motor_Protection_Relay(_Port_Buffer);
+
+					// Handle Pump Status
+					this->Pump_Status(_Port_Buffer);
+
+					// Handle System Anomaly Status
+					this->System_Anomaly(_Port_Buffer);
+
+				}
+
 				// Interrupt Handler Function
-				inline bool INT_DISPLAY(const bool _Clear = false) {
+				inline bool Interrupt_Handler(const uint8_t _Type = INTERRUPT_RTC, const bool _Clean = false) {
 
-					// Get Interrupt Status
-					const bool _Status = bitRead(this->Interrupt_Status, INTERRUPT_DISPLAY);
+					// Define Return Status
+					bool _Status = false;
 
-					// Control for Clear
-					if (_Clear && _Status) bitClear(this->Interrupt_Status, INTERRUPT_DISPLAY);
+					// Control for Type
+					switch (_Type) {
 
-					// Return Display Interrupt
-					return(_Status);
+						// Timer
+						case INTERRUPT_TIMER: {
 
-				}
-				inline bool INT_ENERGY(const bool _Clear = false) {
+							// Read Status
+							_Status = bitRead(this->Interrupt.Status, INTERRUPT_TIMER);
 
-					// Get Interrupt Status
-					const bool _Status = bitRead(this->Interrupt_Status, INTERRUPT_ENERGY);
+							// Control for Clean
+							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_TIMER);
 
-					// Control for Clear
-					if (_Clear && _Status) bitClear(this->Interrupt_Status, INTERRUPT_ENERGY);
+							// Return Display Interrupt
+							return(_Status);
 
-					// Return ENERGY Interrupt
-					return(_Status);
+						}
 
-				}
-				inline bool INT_ENVIRONMENT(const bool _Clear = false) {
+						// Display
+						case INTERRUPT_DISPLAY: {
 
-					// Get Interrupt Status
-					const bool _Status = bitRead(this->Interrupt_Status, INTERRUPT_ENVIRONMENT);
+							// Read Status
+							_Status = bitRead(this->Interrupt.Status, INTERRUPT_DISPLAY);
 
-					// Control for Clear
-					if (_Clear && _Status) bitClear(this->Interrupt_Status, INTERRUPT_ENVIRONMENT);
+							// Control for Clean
+							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_DISPLAY);
 
-					// Return ENVIRONMENT Interrupt
-					return(_Status);
+							// Return Display Interrupt
+							return(_Status);
 
-				}
-				inline bool INT_RS485(const bool _Clear = false) {
+						}
 
-					// Get Interrupt Status
-					const bool _Status = bitRead(this->Interrupt_Status, INTERRUPT_RS485);
+						// Energy 1
+						case INTERRUPT_ENERGY_1: {
 
-					// Control for Clear
-					if (_Clear && _Status) bitClear(this->Interrupt_Status, INTERRUPT_RS485);
+							// Read Status
+							_Status = bitRead(this->Interrupt.Status, INTERRUPT_ENERGY_1);
 
-					// Return RS485 Interrupt
-					return(_Status);
+							// Control for Clean
+							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_ENERGY_1);
 
-				}
-				inline bool INT_RTC(const bool _Clear = false) {
+							// Return Energy 1 Interrupt
+							return(_Status);
 
-					// Get Interrupt Status
-					const bool _Status = bitRead(this->Interrupt_Status, INTERRUPT_RTC);
+						}
 
-					// Control for Clear
-					if (_Clear && _Status) bitClear(this->Interrupt_Status, INTERRUPT_RTC);
+						// Energy 2
+						case INTERRUPT_ENERGY_2: {
 
-					// Return RTC Interrupt
-					return(_Status);
+							// Read Status
+							_Status = bitRead(this->Interrupt.Status, INTERRUPT_ENERGY_2);
+
+							// Control for Clean
+							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_ENERGY_2);
+
+							// Return Energy 2 Interrupt
+							return(_Status);
+
+						}
+
+						// Environment
+						case INTERRUPT_ENVIRONMENT: {
+
+							// Read Status
+							_Status = bitRead(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
+
+							// Control for Clean
+							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
+
+							// Return Environment Interrupt
+							return(_Status);
+
+						}
+
+						// RS485
+						case INTERRUPT_RS485: {
+
+							// Read Status
+							_Status = bitRead(this->Interrupt.Status, INTERRUPT_RS485);
+
+							// Control for Clean
+							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_RS485);
+
+							// Return RS485 Interrupt
+							return(_Status);
+
+						}
+
+						// RTC
+						case INTERRUPT_RTC: {
+
+							// Read Status
+							_Status = bitRead(this->Interrupt.Status, INTERRUPT_RTC);
+
+							// Control for Clean
+							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_RTC);
+
+							// Return RTC Interrupt
+							return(_Status);
+
+						}
+
+					}
+
+					// End Function
+					return(false);
 
 				}
 
@@ -1036,6 +1304,9 @@
 				// Heartbeat Function
 				void Heartbeat(const bool _LED = false, const uint8_t _Color = LED_GREEN) {
 
+					// Control for Terminal Sense
+					this->Terminal_Control();
+
 					// Turn ON HeartBeat
 					PORT_HEARTBEAT |= (1 << PIN_HEARTBEAT);
 
@@ -1045,38 +1316,44 @@
 					// Turn OFF HeartBeat
 					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);
 
-					// Control for Display Interrupt
-					if (this->INT_DISPLAY(true)) {
+					// Print Interrupt Status
+					if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
 
-						// Print Terminal Text
-						Console.Text(2, 13, _Console_GREEN_, RV3028::UNIX_Time(UNIX_GET));
+						// Control for Timer Interrupt
+						if (this->Interrupt_Handler(INTERRUPT_TIMER)) {
 
-						// Print Environment
-						this->Print_Environment();
+							// Print Terminal Text
+							Console.Text(2, 13, _Console_GREEN_, RV3028::UNIX_Time(UNIX_GET));
 
-						// Print Battery
-						this->Print_Battery();
-
-					}
-
-					// Control for Environment Interrupt
-					if (this->INT_ENVIRONMENT(true)) {
-
-						// Read TH Interrupt Status
-						uint8_t _TH_Status = HDC2010::Read_Interrupt_Status();
-
-						// Control for Interrupt
-						if (bitRead(_TH_Status, 5) or bitRead(_TH_Status, 6)) {
-
-							// Set Status Interrupt
-							bitSet(this->Register.Status, __STATUS_SYSTEM__);
-							
-						} else {
-							
-							// Clear Status Interrupt
-							bitClear(this->Register.Status, __STATUS_SYSTEM__);
-							
 						}
+
+						// Control for Display Interrupt
+						if (this->Interrupt_Handler(INTERRUPT_DISPLAY)) {
+
+							// Print Environment
+							this->Print_Environment();
+
+							// Print Battery
+							this->Print_Battery();
+
+							// Print Register Status
+							Console.Show_Status(REGISTER_STATUS, this->Register.Status);
+							Console.Show_Status(REGISTER_PUBLISH, this->Register.Publish);
+							Console.Show_Status(REGISTER_STOP, this->Register.Stop);
+
+						}
+
+						// Print Energy 1 Interrupt
+						Console.Text(46, 78, _Console_CYAN_, (this->Interrupt_Handler(INTERRUPT_ENERGY_1) ? F("X") : F(" ")));
+
+						// Print Energy 2 Interrupt
+						Console.Text(46, 88, _Console_CYAN_, (this->Interrupt_Handler(INTERRUPT_ENERGY_2) ? F("X") : F(" ")));
+
+						// Print Environment Interrupt
+						Console.Text(46, 98, _Console_CYAN_, (this->Interrupt_Handler(INTERRUPT_ENVIRONMENT) ? F("X") : F(" ")));
+
+						// Print RS485 Interrupt
+						Console.Text(46, 110, _Console_CYAN_, (this->Interrupt_Handler(INTERRUPT_RS485) ? F("X") : F(" ")));
 
 					}
 
@@ -1342,35 +1619,10 @@
 		ISR(PCINT2_vect) {	
 
 			// PCMSK2 Handler
-			B107AA::Read_Inputs_Static();
+			B107AA::PCMSK2_Handler_Static();
 
 		}
 
-
-	#endif
-
-	// B108AA Class
-	#ifdef _B108AA_
-
-		// Get Module PinOut
-		#include "B108AA.h"
-
-	#endif
-
-	// B152BA Class
-	#ifdef _B152BA_
-
-		// Get Module PinOut
-		#include "B152BA.h"
-
-
-	#endif
-
-	// B153AA Class
-	#ifdef _B153AA_
-
-		// Get Module PinOut
-		#include "B153AA.h"
 
 	#endif
 
