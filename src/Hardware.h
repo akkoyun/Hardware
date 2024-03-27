@@ -256,6 +256,9 @@
 
 							}
 
+							// Clear Terminal Variable
+							bitClear(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE);
+
 						} else {
 
 							// Start Serial Stream
@@ -263,6 +266,9 @@
 
 								// Start Serial Stream
 								Serial.begin(115200);
+
+								// Start Console
+								Terminal->Begin();
 
 								// Set Terminal Variable
 								bitSet(this->Interrupt.Status, INTERRUPT_TERMINAL_START);
@@ -1302,7 +1308,7 @@
 				// ------------------
 
 				// Heartbeat Function
-				void Heartbeat(const bool _LED = false, const uint8_t _Color = LED_GREEN) {
+				void Heartbeat(const bool _LED = false) {
 
 					// Control for Terminal Sense
 					this->Terminal_Control();
@@ -1311,7 +1317,12 @@
 					PORT_HEARTBEAT |= (1 << PIN_HEARTBEAT);
 
 					// HeartBeat LED Blink
-					if (_LED) this->LED(_Color, 1, 50);
+					if (_LED) {
+
+						// Blink LED
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {this->LED(LED_GREEN, 1, 50);} else {this->LED(LED_RED, 1, 50);}
+
+					}
 
 					// Turn OFF HeartBeat
 					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);
