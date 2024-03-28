@@ -548,8 +548,6 @@
 					uint32_t Stop = 0;
 				} Register;
 
-				
-
 				// Module Constructor
 				explicit B107AA(PowerStat_Console* _Terminal) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298(), SdFat(), Terminal(_Terminal) {
 
@@ -572,7 +570,7 @@
 					this->Terminal_Control();
 
 					// Print Firmware Version
-					Terminal->Text(6, 71, _Console_GRAY_, F(_FIRMWARE_));
+					if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(6, 71, _Console_GRAY_, F(_FIRMWARE_));
 
 					// Print Hardware Version
 					// TODO: board düzeltilecek
@@ -582,12 +580,12 @@
 					if (RV3028::Begin()) {
 
 						// Print Diagnostic Message
-						Terminal->Text(5, 36, _Console_GREEN_, F("OK"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(5, 36, _Console_GREEN_, F("OK"));
 
 					} else {
 
 						// Print Diagnostic Message
-						Terminal->Text(5, 35, _Console_RED_, F("FAIL"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(5, 35, _Console_RED_, F("FAIL"));
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_SYSTEM__);
@@ -596,15 +594,20 @@
 					if (DS28C::Begin()) {
 
 						// Print Diagnostic Message
-						Terminal->Text(6, 36, _Console_GREEN_, F("OK"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
 
-						// Print Serial Number
-						Terminal->Text(5, 63, _Console_GRAY_, DS28C::SerialID);
+							// Print Diagnostic Message
+							Terminal->Text(6, 36, _Console_GREEN_, F("OK"));
+
+							// Print Serial Number
+							Terminal->Text(5, 63, _Console_GRAY_, DS28C::SerialID);
+
+						}
 
 					} else {
 
 						// Print Diagnostic Message
-						Terminal->Text(6, 35, _Console_RED_, F("FAIL"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(6, 35, _Console_RED_, F("FAIL"));
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_SYSTEM__);
@@ -613,15 +616,20 @@
 					if (HDC2010::Begin()) {
 
 						// Print Diagnostic Message
-						Terminal->Text(7, 36, _Console_GREEN_, F("OK"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
+							
+							// Print Diagnostic Message
+							Terminal->Text(7, 36, _Console_GREEN_, F("OK"));
 
-						// Print T/H Values
-						this->Print_Environment();
+							// Print T/H Values
+							this->Print_Environment();
+
+						}
 
 					} else {
 
 						// Print Diagnostic Message
-						Terminal->Text(7, 35, _Console_RED_, F("FAIL"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(7, 35, _Console_RED_, F("FAIL"));
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_SYSTEM__);
@@ -630,19 +638,24 @@
 					if (MAX17055::Begin()) {
 
 						// Print Diagnostic Message
-						Terminal->Text(8, 36, _Console_GREEN_, F("OK"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
 
-						// Print Battery Level
-						Terminal->Text(5, 113, _Console_GRAY_, MAX17055::Instant_Voltage());
-						Terminal->Text(6, 112, _Console_GRAY_, MAX17055::IC_Temperature());
-						Terminal->Text(7, 109, _Console_GRAY_, MAX17055::Average_Current());
-						Terminal->Text(8, 112, _Console_GRAY_, MAX17055::State_Of_Charge());
-						Terminal->Text(9, 112, _Console_GRAY_, MAX17055::Instant_Capacity());
+							// Print Diagnostic Message							
+							Terminal->Text(8, 36, _Console_GREEN_, F("OK"));
+
+							// Print Battery Level
+							Terminal->Text(5, 113, _Console_GRAY_, MAX17055::Instant_Voltage());
+							Terminal->Text(6, 112, _Console_GRAY_, MAX17055::IC_Temperature());
+							Terminal->Text(7, 109, _Console_GRAY_, MAX17055::Average_Current());
+							Terminal->Text(8, 112, _Console_GRAY_, MAX17055::State_Of_Charge());
+							Terminal->Text(9, 112, _Console_GRAY_, MAX17055::Instant_Capacity());
+
+						}
 
 					} else {
 
 						// Print Diagnostic Message
-						Terminal->Text(8, 35, _Console_RED_, F("FAIL"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(8, 35, _Console_RED_, F("FAIL"));
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_SYSTEM__);
@@ -651,39 +664,44 @@
 					if (BQ24298::Begin()) {
 
 						// Print Diagnostic Message
-						Terminal->Text(9, 36, _Console_GREEN_, F("OK"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
+							
+							// Print Diagnostic Message
+							Terminal->Text(9, 36, _Console_GREEN_, F("OK"));
 
-						// Print Charger
-						switch (BQ24298::Charge_Status()) {
+							// Print Charger
+							switch (BQ24298::Charge_Status()) {
 
-							case 0: {
-								Terminal->Text(10, 107, _Console_GRAY_, F("Discharge   "));
-								break;
+								case 0: {
+									Terminal->Text(10, 107, _Console_GRAY_, F("Discharge   "));
+									break;
+								}
+
+								case 1: {
+									Terminal->Text(10, 107, _Console_YELLOW_, F("Pre-charge  "));
+									break;
+								}
+
+								case 2: {
+									Terminal->Text(10, 107, _Console_RED_, F("Fast Charge "));
+									break;
+								}
+
+								case 3: {
+									Terminal->Text(10, 107, _Console_GREEN_, F("Charge Done "));
+									break;
+								}
+
+								default:
+									break;
 							}
 
-							case 1: {
-								Terminal->Text(10, 107, _Console_YELLOW_, F("Pre-charge  "));
-								break;
-							}
-
-							case 2: {
-								Terminal->Text(10, 107, _Console_RED_, F("Fast Charge "));
-								break;
-							}
-
-							case 3: {
-								Terminal->Text(10, 107, _Console_GREEN_, F("Charge Done "));
-								break;
-							}
-
-							default:
-								break;
 						}
 
 					} else {
 
 						// Print Diagnostic Message
-						Terminal->Text(9, 35, _Console_RED_, F("FAIL"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(9, 35, _Console_RED_, F("FAIL"));
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_SYSTEM__);
@@ -697,7 +715,7 @@
 					if (!SdFat::begin(53, SD_SCK_MHZ(50))) {
 
 						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_SYSTEM__);
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) bitSet(this->Register.Status, __STATUS_SYSTEM__);
 
 					}
 
@@ -793,20 +811,20 @@
 					this->PCIEx_Mask(true, false, true);
 
 					// Set PCINT4-23 Interrupts
-					this->PCINTxx_Interrupt(4, true);
-					this->PCINTxx_Interrupt(5, true);
-					this->PCINTxx_Interrupt(6, true);
-					this->PCINTxx_Interrupt(7, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT4, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT5, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT6, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT7, true);
 
 					// Set PCINT16-23 Interrupts
-					this->PCINTxx_Interrupt(16, true);
-					this->PCINTxx_Interrupt(17, true);
-					this->PCINTxx_Interrupt(18, true);
-					this->PCINTxx_Interrupt(19, true);
-					this->PCINTxx_Interrupt(20, true);
-					this->PCINTxx_Interrupt(21, true);
-					this->PCINTxx_Interrupt(22, true);
-					this->PCINTxx_Interrupt(23, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT16, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT17, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT18, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT19, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT20, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT21, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT22, true);
+					this->PCINTxx_Interrupt(INTERRUPT_PCINT23, true);
 
 					// Enable Interrupts
 					sei();
@@ -1431,7 +1449,7 @@
 					for (uint8_t i = 84; i < 120; i++) {
 
 						// Print Progress Bar
-						Terminal->Text(21, i, _Console_GRAY_, F("█"));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(21, i, _Console_GRAY_, F("█"));
 
 						// Command Delay
 						delay(_Time / 35);
@@ -1439,7 +1457,7 @@
 					}
 
 					// Clear Progress Bar
-					Terminal->Text(21, 84, _Console_CYAN_, F("                                    "));
+					if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Space(21, 84, 36);
 
 					// Set PIN_GSM_ONOFF Signal LOW
 					PORT_GSM_ONOFF &= ~(1 << PIN_GSM_ONOFF);
@@ -1503,13 +1521,13 @@
 					} else {
 
 						// Print Message
-						Terminal->Show_Message(_Console_CYAN_, F("Powering ON GSM Modem..."));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Powering ON GSM Modem..."));
 
 						// Send On Off Signal
 						this->OnOff(1500);
 
 						// Print Message
-						Terminal->Show_Message(_Console_CYAN_, F("Waiting for Power Monitor..."));
+						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Waiting for Power Monitor..."));
 
 						// Wait for Power Monitor
 						while (millis() - _Start_Time < 15000) {
@@ -1518,7 +1536,7 @@
 							if (this->PowerMonitor()) {
 
 								// Print Message
-								Terminal->Show_Message(_Console_CYAN_, F("Waiting for Ready..."));
+								if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Waiting for Ready..."));
 
 								// Wait for Software Ready
 								while (millis() - _Start_Time < 30000) {
@@ -1549,7 +1567,7 @@
 				bool OFF(void) {
 
 					// Print Message
-					Terminal->Show_Message(_Console_CYAN_, F("Powering OFF GSM Modem..."));
+					if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Powering OFF GSM Modem..."));
 
 					// Turn Off Modem
 					if (this->PowerMonitor()) {
