@@ -34,24 +34,12 @@
 		#ifndef __RV3028__
 			#include <RV3028.h>
 		#endif
-		#ifndef __DS28C__
-			#include <DS28C.h>
-		#endif
-		#ifndef __Environment__
-			#include <Environment.h>
-		#endif
-		#ifndef __MAX17055__
-			#include <MAX17055.h>
-		#endif
-		#ifndef __BQ24298__
-			#include <BQ24298.h>
-		#endif
 		#ifndef SdFat_h
 			#include <SdFat.h>
 		#endif
 
 		// Hardware Class
-		class B107AA : public RV3028, public DS28C, public HDC2010, public MAX17055, public BQ24298, public SdFat {
+		class B107AA : public RV3028, public SdFat {
 
 			// Private Context
 			private:
@@ -68,42 +56,145 @@
 				// Module Pin Definitions
 				void Set_PinOut(void) {
 
-					// Set Module Pin Definitions
-					SET_PIN_OUTPUT_PULLDOWN(RELAY_START);		// Set RELAY_START as Output with Pull-Down
-					SET_PIN_OUTPUT_PULLDOWN(RELAY_STOP);		// Set RELAY_STOP as Output with Pull-Down
-					SET_PIN_INPUT_PULLUP(INT_ENERGY_1);			// Set INT_ENERGY_1 as Input with Pull-Up
-					SET_PIN_INPUT_PULLUP(INT_ENERGY_2);			// Set INT_ENERGY_2 as Input with Pull-Up
-					SET_PIN_INPUT_PULLUP(INT_ENV);				// Set INT_ENV as Input with Pull-Up
-					SET_PIN_INPUT_PULLUP(INT_RTC);				// Set INT_RTC as Input with Pull-Up
-					SET_PIN_OUTPUT_PULLDOWN(EN_3V8);			// Set 3V8_EN as Output with Pull-Down
-					SET_PIN_OUTPUT_PULLDOWN(RS485_DIR);			// Set RS485_DIR as Output with Pull-Down
-					SET_PIN_INPUT_PULLUP(INT_RS485);			// Set INT_RS485 as Input with Pull-Down
-					SET_PIN_INPUT_PULLUP(INT_CHARGER);			// Set INT_CHARGER as Input with Pull-Up
-					SET_PIN_INPUT_PULLUP(INT_GAUGE);			// Set INT_GAUGE as Input with Pull-Up
-					SET_PIN_OUTPUT_PULLDOWN(BUZZER);			// Set 3V3_BUZZER as Output with Pull-Down
-					SET_PIN_INPUT_PULLUP(LCD_SENSE);			// Set LCD_SENSE as Input with Pull-Down
-					SET_PIN_OUTPUT_PULLDOWN(FOTA_POWER_EN);		// Set FOTA_POWER_EN as Output with Pull-Down
-					SET_PIN_INPUT_PULLUP(SD_SENSE);				// Set SD_SENSE as Input with Pull-Down
-					SET_PIN_OUTPUT_PULLDOWN(SD_EN);				// Set SD_EN as Output with Pull-Down
-					SET_PIN_INPUT_PULLUP(TERMINAL_SENSE);		// Set TERMINAL_SENSE as Input with Pull-Up
-					SET_PIN_INPUT_PULLDOWN(GSM_RING);			// Set GSM_RING as Input with Pull-Down
-					SET_PIN_INPUT_PULLDOWN(GSM_PMON);			// Set GSM_PMON as Input with Pull-Down
-					SET_PIN_INPUT_PULLDOWN(GSM_SWREADY);		// Set GSM_SWREADY as Input with Pull-Down
-					SET_PIN_OUTPUT_PULLUP(GSM_COMM_EN);			// Set GSM_COMM_EN as Output with Pull-Up
-					SET_PIN_OUTPUT_PULLDOWN(GSM_ONOFF);			// Set GSM_ONOFF as Output with Pull-Down
-					SET_PIN_OUTPUT_PULLDOWN(GSM_SDOWN);			// Set GSM_SDOWN as Output with Pull-Down
-					SET_PIN_INPUT_PULLDOWN(SENSE_1);			// Set SENSE_1 as Input with Pull-Down
-					SET_PIN_INPUT_PULLDOWN(SENSE_2);			// Set SENSE_2 as Input with Pull-Down
-					SET_PIN_INPUT_PULLDOWN(SENSE_3);			// Set SENSE_3 as Input with Pull-Down
-					SET_PIN_INPUT_PULLDOWN(SENSE_4);			// Set SENSE_4 as Input with Pull-Down
-					SET_PIN_INPUT_PULLDOWN(SENSE_5);			// Set SENSE_5 as Input with Pull-Down
-					SET_PIN_INPUT_PULLDOWN(SENSE_6);			// Set SENSE_6 as Input with Pull-Down
-					SET_PIN_INPUT_PULLDOWN(SENSE_7);			// Set SENSE_7 as Input with Pull-Down
-					SET_PIN_INPUT_PULLDOWN(SENSE_8);			// Set SENSE_8 as Input with Pull-Down
-					SET_PIN_OUTPUT_PULLDOWN(MCU_LED_RED);		// Set MCU_LED_RED as Output with Pull-Down
-					SET_PIN_OUTPUT_PULLDOWN(MCU_LED_GREEN);		// Set MCU_LED_GREEN as Output with Pull-Down
-					SET_PIN_OUTPUT_PULLDOWN(MCU_LED_BLUE);		// Set MCU_LED_BLUE as Output with Pull-Down
-					SET_PIN_OUTPUT_PULLDOWN(HEARTBEAT);			// Set HEARTBEAT as Output with Pull-Down
+					// Set PIN_RELAY_START as Output with Pull-Down
+					DDR_RELAY_START |= (1 << PIN_RELAY_START); 			// Output
+					PORT_RELAY_START &= ~(1 << PIN_RELAY_START);		// Pull-Down
+
+					// Set PIN_RELAY_STOP as Output with Pull-Down
+					DDR_RELAY_STOP |= (1 << PIN_RELAY_STOP); 			// Output
+					PORT_RELAY_STOP &= ~(1 << PIN_RELAY_STOP);			// Pull-Down
+
+					// Set PIN_INT_ENERGY_1 as Input with Pull-Up
+					DDR_INT_ENERGY_1 &= ~(1 << PIN_INT_ENERGY_1); 		// Input
+					PORT_INT_ENERGY_1 |= (1 << PIN_INT_ENERGY_1);		// Pull-Up
+
+					// Set PIN_INT_ENERGY_2 as Input with Pull-Up
+					DDR_INT_ENERGY_2 &= ~(1 << PIN_INT_ENERGY_2); 		// Input
+					PORT_INT_ENERGY_2 |= (1 << PIN_INT_ENERGY_2);		// Pull-Up
+
+					// Set PIN_INT_ENV as Input with Pull-Up
+					DDR_INT_ENV &= ~(1 << PIN_INT_ENV); 				// Input
+					PORT_INT_ENV |= (1 << PIN_INT_ENV);					// Pull-Up
+
+					// Set PIN_INT_RTC as Input with Pull-Up
+					DDR_INT_RTC &= ~(1 << PIN_INT_RTC); 				// Input
+					PORT_INT_RTC |= (1 << PIN_INT_RTC);					// Pull-Up
+
+					// Set PIN_EN_3V8 as Output with Pull-Down
+					DDR_EN_3V8 |= (1 << PIN_EN_3V8); 					// Output
+					PORT_EN_3V8 &= ~(1 << PIN_EN_3V8);					// Pull-Down
+
+					// Set PIN_RS485_DIR as Output with Pull-Down
+					DDR_RS485_DIR |= (1 << PIN_RS485_DIR); 				// Output
+					PORT_RS485_DIR &= ~(1 << PIN_RS485_DIR);			// Pull-Down
+
+					// Set PIN_INT_RS485 as Input with Pull-Up
+					DDR_INT_RS485 &= ~(1 << PIN_INT_RS485); 			// Input
+					PORT_INT_RS485 |= (1 << PIN_INT_RS485);				// Pull-Up
+
+					// Set PIN_INT_CHARGER as Input with Pull-Up
+					DDR_INT_CHARGER &= ~(1 << PIN_INT_CHARGER); 		// Input
+					PORT_INT_CHARGER |= (1 << PIN_INT_CHARGER);			// Pull-Up
+
+					// Set PIN_INT_GAUGE as Input with Pull-Up
+					DDR_INT_GAUGE &= ~(1 << PIN_INT_GAUGE); 			// Input
+					PORT_INT_GAUGE |= (1 << PIN_INT_GAUGE);				// Pull-Up
+
+					// Set PIN_BUZZER as Output with Pull-Down
+					DDR_BUZZER |= (1 << PIN_BUZZER); 					// Output
+					PORT_BUZZER &= ~(1 << PIN_BUZZER);					// Pull-Down
+
+					// Set PIN_LCD_SENSE as Input with Pull-Up
+					DDR_LCD_SENSE &= ~(1 << PIN_LCD_SENSE); 			// Input
+					PORT_LCD_SENSE |= (1 << PIN_LCD_SENSE);				// Pull-Up
+
+					// Set PIN_FOTA_POWER_EN as Output with Pull-Down
+					DDR_FOTA_POWER_EN |= (1 << PIN_FOTA_POWER_EN); 		// Output
+					PORT_FOTA_POWER_EN &= ~(1 << PIN_FOTA_POWER_EN);	// Pull-Down
+
+					// Set PIN_SD_SENSE as Input with Pull-Up
+					DDR_SD_SENSE &= ~(1 << PIN_SD_SENSE); 				// Input
+					PORT_SD_SENSE |= (1 << PIN_SD_SENSE);				// Pull-Up
+
+					// Set PIN_SD_EN as Output with Pull-Down
+					DDR_SD_EN |= (1 << PIN_SD_EN); 						// Output
+					PORT_SD_EN &= ~(1 << PIN_SD_EN);					// Pull-Down
+
+					// Set PIN_TERMINAL_SENSE as Input with Pull-Up
+					DDR_TERMINAL_SENSE &= ~(1 << PIN_TERMINAL_SENSE); 	// Input
+					PORT_TERMINAL_SENSE |= (1 << PIN_TERMINAL_SENSE);	// Pull-Up
+
+					// Set PIN_GSM_RING as Input with Pull-Down
+					DDR_GSM_RING &= ~(1 << PIN_GSM_RING); 				// Input
+					PORT_GSM_RING &= ~(1 << PIN_GSM_RING);				// Pull-Down
+
+					// Set PIN_GSM_PMON as Input with Pull-Down
+					DDR_GSM_PMON &= ~(1 << PIN_GSM_PMON); 				// Input
+					PORT_GSM_PMON &= ~(1 << PIN_GSM_PMON);				// Pull-Down
+
+					// Set PIN_GSM_SWREADY as Input with Pull-Down
+					DDR_GSM_SWREADY &= ~(1 << PIN_GSM_SWREADY); 		// Input
+					PORT_GSM_SWREADY &= ~(1 << PIN_GSM_SWREADY);		// Pull-Down
+
+					// Set PIN_GSM_COMM_EN as Output with Pull-Up
+					DDR_GSM_COMM_EN |= (1 << PIN_GSM_COMM_EN); 			// Output
+					PORT_GSM_COMM_EN |= (1 << PIN_GSM_COMM_EN);			// Pull-Up
+
+					// Set PIN_GSM_ONOFF as Output with Pull-Down
+					DDR_GSM_ONOFF |= (1 << PIN_GSM_ONOFF); 				// Output
+					PORT_GSM_ONOFF &= ~(1 << PIN_GSM_ONOFF);			// Pull-Down
+
+					// Set PIN_GSM_SDOWN as Output with Pull-Down
+					DDR_GSM_SDOWN |= (1 << PIN_GSM_SDOWN); 				// Output
+					PORT_GSM_SDOWN &= ~(1 << PIN_GSM_SDOWN);			// Pull-Down
+
+					// Set PIN_SENSE_1 as Input with Pull-Down
+					DDR_SENSE_1 &= ~(1 << PIN_SENSE_1); 				// Input
+					PORT_SENSE_1 &= ~(1 << PIN_SENSE_1);				// Pull-Down
+
+					// Set PIN_SENSE_2 as Input with Pull-Down
+					DDR_SENSE_2 &= ~(1 << PIN_SENSE_2); 				// Input
+					PORT_SENSE_2 &= ~(1 << PIN_SENSE_2);				// Pull-Down
+
+					// Set PIN_SENSE_3 as Input with Pull-Down
+					DDR_SENSE_3 &= ~(1 << PIN_SENSE_3); 				// Input
+					PORT_SENSE_3 &= ~(1 << PIN_SENSE_3);				// Pull-Down
+
+					// Set PIN_SENSE_4 as Input with Pull-Down
+					DDR_SENSE_4 &= ~(1 << PIN_SENSE_4); 				// Input
+					PORT_SENSE_4 &= ~(1 << PIN_SENSE_4);				// Pull-Down
+
+					// Set PIN_SENSE_5 as Input with Pull-Down
+					DDR_SENSE_5 &= ~(1 << PIN_SENSE_5); 				// Input
+					PORT_SENSE_5 &= ~(1 << PIN_SENSE_5);				// Pull-Down
+
+					// Set PIN_SENSE_6 as Input with Pull-Down
+					DDR_SENSE_6 &= ~(1 << PIN_SENSE_6); 				// Input
+					PORT_SENSE_6 &= ~(1 << PIN_SENSE_6);				// Pull-Down
+
+					// Set PIN_SENSE_7 as Input with Pull-Down
+					DDR_SENSE_7 &= ~(1 << PIN_SENSE_7); 				// Input
+					PORT_SENSE_7 &= ~(1 << PIN_SENSE_7);				// Pull-Down
+
+					// Set PIN_SENSE_8 as Input with Pull-Down
+					DDR_SENSE_8 &= ~(1 << PIN_SENSE_8); 				// Input
+					PORT_SENSE_8 &= ~(1 << PIN_SENSE_8);				// Pull-Down
+
+					// Set PIN_MCU_LED_RED as Output with Pull-Down
+					DDR_MCU_LED_RED |= (1 << PIN_MCU_LED_RED); 			// Output
+					PORT_MCU_LED_RED &= ~(1 << PIN_MCU_LED_RED);		// Pull-Down
+
+					// Set PIN_MCU_LED_GREEN as Output with Pull-Down
+					DDR_MCU_LED_GREEN |= (1 << PIN_MCU_LED_GREEN); 		// Output
+					PORT_MCU_LED_GREEN &= ~(1 << PIN_MCU_LED_GREEN);	// Pull-Down
+
+					// Set PIN_MCU_LED_BLUE as Output with Pull-Down
+					DDR_MCU_LED_BLUE |= (1 << PIN_MCU_LED_BLUE); 		// Output
+					PORT_MCU_LED_BLUE &= ~(1 << PIN_MCU_LED_BLUE);		// Pull-Down
+
+					// Set PIN_HEARTBEAT as Output with Pull-Down
+					DDR_HEARTBEAT |= (1 << PIN_HEARTBEAT); 				// Output
+					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);			// Pull-Down
 
 				}
 
@@ -284,65 +375,14 @@
 
 				}
 
-				// Terminal Display Function
-				// -------------------------
-
-				// Print Environment Function
-				void Print_Environment(void) {
-
-					// Print T/H Values
-					Terminal->Text(8, 72, _Console_GRAY_, HDC2010::Temperature());
-					Terminal->Text(9, 72, _Console_GRAY_, HDC2010::Humidity());
-
-				}
-
-				// Print Battery Function
-				void Print_Battery(void) {
-
-					// Print Battery Level
-					Terminal->Text(5, 113, _Console_GRAY_, MAX17055::Instant_Voltage());
-					Terminal->Text(6, 112, _Console_GRAY_, MAX17055::IC_Temperature());
-					Terminal->Text(7, 109, _Console_GRAY_, MAX17055::Average_Current());
-					Terminal->Text(8, 112, _Console_GRAY_, MAX17055::State_Of_Charge());
-					Terminal->Text(9, 112, _Console_GRAY_, MAX17055::Instant_Capacity());
-
-					// Print Charger
-					switch (BQ24298::Charge_Status()) {
-
-						case 0: {
-							Terminal->Text(10, 107, _Console_GRAY_, F("Discharge   "));
-							break;
-						}
-
-						case 1: {
-							Terminal->Text(10, 107, _Console_YELLOW_, F("Pre-charge  "));
-							break;
-						}
-
-						case 2: {
-							Terminal->Text(10, 107, _Console_RED_, F("Fast Charge "));
-							break;
-						}
-
-						case 3: {
-							Terminal->Text(10, 107, _Console_GREEN_, F("Charge Done "));
-							break;
-						}
-
-						default:
-							break;
-					}
-
-				}
-
 				// Handle Input Functions
 				// ----------------------
 
 				// Handle Input Functions
-				bool Phase_R(const uint8_t _Port_Buffer) {
+				bool Phase_R(void) {
 
 					// Handle Phase R Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_R__)) {
+					if (CONTROL_PHASE_R) {
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_PHASE_R__);
@@ -361,10 +401,10 @@
 					}
 
 				}
-				bool Phase_S(const uint8_t _Port_Buffer) {
+				bool Phase_S(void) {
 
 					// Handle Phase S Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_S__)) {
+					if (CONTROL_PHASE_S) {
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_PHASE_S__);
@@ -383,10 +423,10 @@
 					}
 
 				}
-				bool Phase_T(const uint8_t _Port_Buffer) {
+				bool Phase_T(void) {
 
 					// Handle Phase T Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_T__)) {
+					if (CONTROL_PHASE_T) {
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_PHASE_T__);
@@ -405,10 +445,10 @@
 					}
 
 				}
-				bool Thermic_Fault(const uint8_t _Port_Buffer) {
+				bool Thermic_Fault(void) {
 
 					// Handle Thermic Fault Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_TH__)) {
+					if (CONTROL_TH) {
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_FAULT_TH__);
@@ -427,10 +467,10 @@
 					}
 
 				}
-				bool Motor_Protection_Relay(const uint8_t _Port_Buffer) {
+				bool Motor_Protection_Relay(void) {
 
 					// Handle Motor Protection Relay Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_MP__)) {
+					if (CONTROL_MP) {
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_FAULT_MP__);
@@ -449,10 +489,10 @@
 					}
 
 				}
-				bool Pump_Status(const uint8_t _Port_Buffer) {
+				bool Pump_Status(void) {
 
 					// Handle for Pump Status
-					if (bitRead(_Port_Buffer, __INPUT_PIN_M1__) && bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__)) {
+					if (CONTROL_M1 && CONTROL_M2 && !CONTROL_M3) {
 
 						// Set Status Register
 						bitSet(this->Register.Status, __STATUS_PUMP__);
@@ -471,66 +511,49 @@
 					}
 
 				}
-				bool System_Anomaly(const uint8_t _Port_Buffer) {
+				bool System_Anomaly(void) {
+
+					// Declare Current Status
+					bool _SA_Status = bitRead(this->Register.Status, __STATUS_FAULT_SA__);
 
 					// Just M1 Active
-					if ((bitRead(_Port_Buffer, __INPUT_PIN_M1__) && !bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__))) { 
+					if (CONTROL_M1 && !CONTROL_M2 && !CONTROL_M3) _SA_Status = true;
 
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
-
-					} 
-					
 					// Just M2 Active
-					else if (!bitRead(_Port_Buffer, __INPUT_PIN_M1__) && bitRead(_Port_Buffer, __INPUT_PIN_M2__) && !bitRead(_Port_Buffer, __INPUT_PIN_M3__)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
-
-					}
+					if (!CONTROL_M1 && CONTROL_M2 && !CONTROL_M3) _SA_Status = true;
 
 					// Just M3 Active
-					else if (!bitRead(_Port_Buffer, __INPUT_PIN_M1__) && !bitRead(_Port_Buffer, __INPUT_PIN_M2__) && bitRead(_Port_Buffer, __INPUT_PIN_M3__)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
-
-					}
+					if (!CONTROL_M1 && !CONTROL_M2 && CONTROL_M3) _SA_Status = true;
 
 					// Pump Active and TH Active
-					else if (bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, __INPUT_PIN_TH__)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
-
-					}
+					if (CONTROL_M1 && CONTROL_M2 && !CONTROL_M3 && CONTROL_TH) _SA_Status = true;
 
 					// Pump Active and MP Active
-					else if (bitRead(this->Register.Status, __STATUS_PUMP__) && bitRead(_Port_Buffer, __INPUT_PIN_MP__)) {
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
-
-					}
+					if (CONTROL_M1 && CONTROL_M2 && !CONTROL_M3 && CONTROL_MP) _SA_Status = true;
 
 					// All Phases Active and MP Active
-					else if (bitRead(this->Register.Status, __STATUS_PHASE_R__) && bitRead(this->Register.Status, __STATUS_PHASE_S__) && bitRead(this->Register.Status, __STATUS_PHASE_T__) && bitRead(_Port_Buffer, __INPUT_PIN_MP__)) {
+					if (CONTROL_PHASE_R && CONTROL_PHASE_S && CONTROL_PHASE_T && CONTROL_MP) _SA_Status = true;
 
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+					// Control for State Change
+					if (_SA_Status != bitRead(this->Register.Status, __STATUS_FAULT_SA__)) {
 
-					} 
-	
-					// No Anomaly
-					else {
+						// Control for SA Status
+						if (_SA_Status) {
 
-						// Clear Status Register
-						bitClear(this->Register.Status, __STATUS_FAULT_SA__);
+							// Set Status Register
+							bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+
+						} else {
+
+							// Clear Status Register
+							bitClear(this->Register.Status, __STATUS_FAULT_SA__);
+
+						}
 
 					}
 
 					// End Function
-					return (bitRead(_Port_Buffer, __STATUS_FAULT_SA__));
+					return (_SA_Status);
 
 				}
 
@@ -549,7 +572,7 @@
 				} Register;
 
 				// Module Constructor
-				explicit B107AA(PowerStat_Console* _Terminal) : RV3028(), DS28C(), HDC2010(), MAX17055(), BQ24298(), SdFat(), Terminal(_Terminal) {
+				explicit B107AA(PowerStat_Console* _Terminal) : RV3028(), SdFat(), Terminal(_Terminal) {
 
 					// Set Pin Out
 					this->Set_PinOut();
@@ -591,122 +614,6 @@
 						bitSet(this->Register.Status, __STATUS_SYSTEM__);
 
 					}
-					if (DS28C::Begin()) {
-
-						// Print Diagnostic Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
-
-							// Print Diagnostic Message
-							Terminal->Text(6, 36, _Console_GREEN_, F("OK"));
-
-							// Print Serial Number
-							Terminal->Text(5, 63, _Console_GRAY_, DS28C::SerialID);
-
-						}
-
-					} else {
-
-						// Print Diagnostic Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(6, 35, _Console_RED_, F("FAIL"));
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_SYSTEM__);
-
-					}
-					if (HDC2010::Begin()) {
-
-						// Print Diagnostic Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
-							
-							// Print Diagnostic Message
-							Terminal->Text(7, 36, _Console_GREEN_, F("OK"));
-
-							// Print T/H Values
-							this->Print_Environment();
-
-						}
-
-					} else {
-
-						// Print Diagnostic Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(7, 35, _Console_RED_, F("FAIL"));
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_SYSTEM__);
-
-					}
-					if (MAX17055::Begin()) {
-
-						// Print Diagnostic Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
-
-							// Print Diagnostic Message							
-							Terminal->Text(8, 36, _Console_GREEN_, F("OK"));
-
-							// Print Battery Level
-							Terminal->Text(5, 113, _Console_GRAY_, MAX17055::Instant_Voltage());
-							Terminal->Text(6, 112, _Console_GRAY_, MAX17055::IC_Temperature());
-							Terminal->Text(7, 109, _Console_GRAY_, MAX17055::Average_Current());
-							Terminal->Text(8, 112, _Console_GRAY_, MAX17055::State_Of_Charge());
-							Terminal->Text(9, 112, _Console_GRAY_, MAX17055::Instant_Capacity());
-
-						}
-
-					} else {
-
-						// Print Diagnostic Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(8, 35, _Console_RED_, F("FAIL"));
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_SYSTEM__);
-
-					}
-					if (BQ24298::Begin()) {
-
-						// Print Diagnostic Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
-							
-							// Print Diagnostic Message
-							Terminal->Text(9, 36, _Console_GREEN_, F("OK"));
-
-							// Print Charger
-							switch (BQ24298::Charge_Status()) {
-
-								case 0: {
-									Terminal->Text(10, 107, _Console_GRAY_, F("Discharge   "));
-									break;
-								}
-
-								case 1: {
-									Terminal->Text(10, 107, _Console_YELLOW_, F("Pre-charge  "));
-									break;
-								}
-
-								case 2: {
-									Terminal->Text(10, 107, _Console_RED_, F("Fast Charge "));
-									break;
-								}
-
-								case 3: {
-									Terminal->Text(10, 107, _Console_GREEN_, F("Charge Done "));
-									break;
-								}
-
-								default:
-									break;
-							}
-
-						}
-
-					} else {
-
-						// Print Diagnostic Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(9, 35, _Console_RED_, F("FAIL"));
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_SYSTEM__);
-
-					}
 
 					// Enable SD Multiplexer
 					this->SD_Multiplexer(true);
@@ -727,72 +634,72 @@
 
 					// Read Boot Default Interrupt Status
 					if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
-						
+
 						// Set Energy 1 Interrupt
 						bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
 
 						// Clear Energy 1 Interrupt
 						bitClear(this->Interrupt.Status, INTERRUPT_ENERGY_1);
-						
+
 					} else {
-						
+
 						// Clear Energy 1 Interrupt
 						bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
 
 						// Set Energy 1 Interrupt Status
 						bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_1);
-						
+
 					}
 					if (bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
-						
+
 						// Set Energy 2 Interrupt
 						bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
 
 						// Clear Energy 2 Interrupt
 						bitClear(this->Interrupt.Status, INTERRUPT_ENERGY_2);
-						
+
 					} else {
-						
+
 						// Clear Energy 2 Interrupt
 						bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
 
 						// Set Energy 2 Interrupt Status
 						bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_2);
-						
+
 					}
 					if (bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
-						
+
 						// Set Environment Interrupt
 						bitSet(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
 						// Clear Environment Interrupt
 						bitClear(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
-						
+
 					} else {
-						
+
 						// Clear Environment Interrupt
 						bitClear(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
 						// Set Environment Interrupt Status
 						bitSet(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
-						
+
 					}
 					if (bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
-						
+
 						// Set RTC Interrupt
 						bitSet(this->Interrupt.Buffer, INTERRUPT_RTC);
 
 						// Clear RTC Interrupt
 						bitClear(this->Interrupt.Status, INTERRUPT_RTC);
-						
+
 					} else {
-						
+
 						// Clear RTC Interrupt
 						bitClear(this->Interrupt.Buffer, INTERRUPT_RTC);
 
 						// Set RTC Interrupt Status
 						bitSet(this->Interrupt.Status, INTERRUPT_RTC);
-						
+
 					}
 
 					// Control for Inputs
@@ -1045,36 +952,33 @@
 				}
 
 				// Static Read Inputs Function
-			    static void PCMSK2_Handler_Static(void) {
+				static void PCMSK2_Handler_Static(void) {
 
 					// Control for Instance
-			        if (instance) {
+					if (instance) {
 
 						// Read Inputs
-            			instance->PCMSK2_Handler();
+						instance->PCMSK2_Handler();
 
-        			}
+					}
 
-    			}
+				}
 				void PCMSK2_Handler(void) {
 
-					// Set Input Port Variables
-					uint8_t _Port_Buffer = PINK;
-
 					// Handle Phase Status
-					this->Phase_R(_Port_Buffer);
-					this->Phase_S(_Port_Buffer);
-					this->Phase_T(_Port_Buffer);
+					this->Phase_R();
+					this->Phase_S();
+					this->Phase_T();
 
 					// Handle Defect Status
-					this->Thermic_Fault(_Port_Buffer);
-					this->Motor_Protection_Relay(_Port_Buffer);
+					this->Thermic_Fault();
+					this->Motor_Protection_Relay();
 
 					// Handle Pump Status
-					this->Pump_Status(_Port_Buffer);
+					this->Pump_Status();
 
 					// Handle System Anomaly Status
-					this->System_Anomaly(_Port_Buffer);
+					this->System_Anomaly();
 
 				}
 
@@ -1189,6 +1093,14 @@
 
 					// End Function
 					return(false);
+
+				}
+
+				// Terminal Status Function
+				inline bool Terminal_Status(void) {
+
+					// Return Terminal Status
+					return(bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE));
 
 				}
 
@@ -1358,12 +1270,6 @@
 
 						// Control for Display Interrupt
 						if (this->Interrupt_Handler(INTERRUPT_DISPLAY)) {
-
-							// Print Environment
-							this->Print_Environment();
-
-							// Print Battery
-							this->Print_Battery();
 
 							// Print Register Status
 							Console.Show_Status(REGISTER_STATUS, this->Register.Status);
@@ -1651,7 +1557,6 @@
 			B107AA::PCMSK2_Handler_Static();
 
 		}
-
 
 	#endif
 
