@@ -31,15 +31,12 @@
 		#ifndef __Console__
 			#include <Console.h>
 		#endif
-		#ifndef __RV3028__
-			#include <RV3028.h>
-		#endif
 		#ifndef SdFat_h
 			#include <SdFat.h>
 		#endif
 
 		// Hardware Class
-		class B107AA : public RV3028, public SdFat {
+		class B107AA : public SdFat {
 
 			// Private Context
 			private:
@@ -314,15 +311,15 @@
 				// ----------------
 
 				// Read PUBLISH Register from EEPROM Function
-				void Read_Register(void) {
+//				void Read_Register(void) {
 
 					// Read Publish Register
-					this->Register.Publish = (((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_2__) << 24) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_1__) << 16) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_2__) << 8) | (uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_1__));
+//					this->Register.Publish = (((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_2__) << 24) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_1__) << 16) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_2__) << 8) | (uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_1__));
 
 					// Read Stop Register
-					this->Register.Stop = (((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_2__) << 24) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_1__) << 16) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_2__) << 8) | (uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_1__));
+//					this->Register.Stop = (((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_2__) << 24) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_1__) << 16) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_2__) << 8) | (uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_1__));
 
-				}
+//				}
 
 				// Terminal Functions
 				// ------------------
@@ -572,7 +569,7 @@
 				} Register;
 
 				// Module Constructor
-				explicit B107AA(PowerStat_Console* _Terminal) : RV3028(), SdFat(), Terminal(_Terminal) {
+				explicit B107AA(PowerStat_Console* _Terminal) : SdFat(), Terminal(_Terminal) {
 
 					// Set Pin Out
 					this->Set_PinOut();
@@ -599,22 +596,6 @@
 					// TODO: board düzeltilecek
 					//Terminal->Text(7, 71, _Console_GRAY_, F(_HARDWARE_));
 
-					// Begin I2C Devices
-					if (RV3028::Begin()) {
-
-						// Print Diagnostic Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(5, 36, _Console_GREEN_, F("OK"));
-
-					} else {
-
-						// Print Diagnostic Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(5, 35, _Console_RED_, F("FAIL"));
-
-						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_SYSTEM__);
-
-					}
-
 					// Enable SD Multiplexer
 					this->SD_Multiplexer(true);
 
@@ -630,7 +611,7 @@
 					this->SD_Multiplexer(false);
 
 					// Read Register from EEPROM
-					this->Read_Register();
+//					this->Read_Register();
 
 					// Read Boot Default Interrupt Status
 					if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
@@ -1259,14 +1240,6 @@
 
 					// Print Interrupt Status
 					if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
-
-						// Control for Timer Interrupt
-						if (this->Interrupt_Handler(INTERRUPT_TIMER)) {
-
-							// Print Terminal Text
-							Console.Text(2, 13, _Console_GREEN_, RV3028::UNIX_Time(UNIX_GET));
-
-						}
 
 						// Control for Display Interrupt
 						if (this->Interrupt_Handler(INTERRUPT_DISPLAY)) {
