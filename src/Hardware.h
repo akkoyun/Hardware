@@ -517,35 +517,33 @@
 					if (CONTROL_M1 && !CONTROL_M2 && !CONTROL_M3) _SA_Status = true;
 
 					// Just M2 Active
-					if (!CONTROL_M1 && CONTROL_M2 && !CONTROL_M3) _SA_Status = true;
+					else if (!CONTROL_M1 && CONTROL_M2 && !CONTROL_M3) _SA_Status = true;
 
 					// Just M3 Active
-					if (!CONTROL_M1 && !CONTROL_M2 && CONTROL_M3) _SA_Status = true;
+					else if (!CONTROL_M1 && !CONTROL_M2 && CONTROL_M3) _SA_Status = true;
 
 					// Pump Active and TH Active
-					if (CONTROL_M1 && CONTROL_M2 && !CONTROL_M3 && CONTROL_TH) _SA_Status = true;
+					else if (CONTROL_M1 && CONTROL_M2 && !CONTROL_M3 && CONTROL_TH) _SA_Status = true;
 
 					// Pump Active and MP Active
-					if (CONTROL_M1 && CONTROL_M2 && !CONTROL_M3 && CONTROL_MP) _SA_Status = true;
+					else if (CONTROL_M1 && CONTROL_M2 && !CONTROL_M3 && CONTROL_MP) _SA_Status = true;
 
 					// All Phases Active and MP Active
-					if (CONTROL_PHASE_R && CONTROL_PHASE_S && CONTROL_PHASE_T && CONTROL_MP) _SA_Status = true;
+					else if (CONTROL_PHASE_R && CONTROL_PHASE_S && CONTROL_PHASE_T && CONTROL_MP) _SA_Status = true;
 
-					// Control for State Change
-					if (_SA_Status != bitRead(this->Register.Status, __STATUS_FAULT_SA__)) {
+					// System Normal
+					else _SA_Status = false;
 
-						// Control for SA Status
-						if (_SA_Status) {
+					// Control for SA Status
+					if (_SA_Status) {
 
-							// Set Status Register
-							bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+						// Set Status Register
+						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
 
-						} else {
+					} else {
 
-							// Clear Status Register
-							bitClear(this->Register.Status, __STATUS_FAULT_SA__);
-
-						}
+						// Clear Status Register
+						bitClear(this->Register.Status, __STATUS_FAULT_SA__);
 
 					}
 
@@ -850,18 +848,18 @@
 				void PCMSK0_Handler(void) {
 
 					// Control for ENERGY Interrupt
-					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENERGY_1) != bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
+					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENERGY_1) != !bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
 
 						// Set ENERGY 1 Interrupt
 						if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
 
-							// Set ENERGY 1 Interrupt Mask
-							bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
+							// Clear ENERGY 1 Interrupt Mask
+							bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
 							
 						} else {
 							
-							// Clear ENERGY 1 Interrupt Mask
-							bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
+							// Set ENERGY 1 Interrupt Mask
+							bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
 
 							// Set ENERGY 1 Interrupt
 							bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_1);
@@ -871,18 +869,18 @@
 					}
 
 					// Control for ENERGY Interrupt
-					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENERGY_2) != bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
+					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENERGY_2) != !bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
 
 						// Set ENERGY Interrupt
 						if (bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
 
-							// Set ENERGY Interrupt Mask
-							bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
+							// Clear ENERGY Interrupt Mask
+							bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
 							
 						} else {
 							
-							// Clear ENERGY Interrupt Mask
-							bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
+							// Set ENERGY Interrupt Mask
+							bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
 
 							// Set ENERGY Interrupt
 							bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_2);
@@ -892,18 +890,18 @@
 					}
 
 					// Control for ENVIRONMENT Interrupt
-					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT) != bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
+					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT) != !bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
 
 						// Set ENVIRONMENT Interrupt
 						if (bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
 
-							// Set ENVIRONMENT Interrupt Mask	
-							bitSet(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+							// Clear ENVIRONMENT Interrupt Mask
+							bitClear(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
 						} else {
 							
-							// Clear ENVIRONMENT Interrupt Mask
-							bitClear(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+							// Set ENVIRONMENT Interrupt Mask	
+							bitSet(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
 							// Set ENVIRONMENT Interrupt
 							bitSet(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
@@ -913,18 +911,18 @@
 					}
 
 					// Control for RTC Interrupt
-					if (bitRead(this->Interrupt.Buffer, INTERRUPT_RTC) != bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
+					if (bitRead(this->Interrupt.Buffer, INTERRUPT_RTC) != !bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
 
 						// Set RTC Interrupt
 						if (bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
 							
-							// Set RTC Interrupt Mask
-							bitSet(this->Interrupt.Buffer, INTERRUPT_RTC);
+							// Clear RTC Interrupt Mask
+							bitClear(this->Interrupt.Buffer, INTERRUPT_RTC);
 							
 						} else {
 
-							// Clear RTC Interrupt Mask
-							bitClear(this->Interrupt.Buffer, INTERRUPT_RTC);
+							// Set RTC Interrupt Mask
+							bitSet(this->Interrupt.Buffer, INTERRUPT_RTC);
 
 							// Set RTC Interrupt
 							bitSet(this->Interrupt.Status, INTERRUPT_RTC);
@@ -963,6 +961,17 @@
 
 					// Handle System Anomaly Status
 					this->System_Anomaly();
+
+					// Control for Buffer
+					if (this->Interrupt.Status != this->Interrupt.Buffer) {
+
+						// Set Interrupt to Status
+						bitSet(this->Interrupt.Status, INTERRUPT_PINCHANGE);
+
+						// Set Buffer to Status
+						this->Interrupt.Buffer = this->Interrupt.Status;
+
+					}
 
 				}
 
@@ -1069,6 +1078,20 @@
 							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_RTC);
 
 							// Return RTC Interrupt
+							return(_Status);
+
+						}
+
+						// Pin Change
+						case INTERRUPT_PINCHANGE: {
+
+							// Read Status
+							_Status = bitRead(this->Interrupt.Status, INTERRUPT_PINCHANGE);
+
+							// Control for Clean
+							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_PINCHANGE);
+
+							// Return Pin Change Interrupt
 							return(_Status);
 
 						}
