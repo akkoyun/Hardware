@@ -686,6 +686,9 @@
 					// Control for Inputs
 					this->PCMSK2_Handler();
 
+					// Set Buffer to Status
+					this->Interrupt.Buffer = this->Interrupt.Status;
+
 					// Disable Interrupts
 					cli();
 
