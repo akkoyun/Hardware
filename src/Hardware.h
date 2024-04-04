@@ -857,14 +857,14 @@
 							bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
 							
 						} else {
-							
+
 							// Set ENERGY 1 Interrupt Mask
 							bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
 
-							// Set ENERGY 1 Interrupt
-							bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_1);
-
 						}
+
+						// Set ENERGY 1 Interrupt
+						bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_1);
 
 					}
 
@@ -882,10 +882,10 @@
 							// Set ENERGY Interrupt Mask
 							bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
 
-							// Set ENERGY Interrupt
-							bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_2);
-
 						}
+
+						// Set ENERGY Interrupt
+						bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_2);
 
 					}
 
@@ -903,10 +903,10 @@
 							// Set ENVIRONMENT Interrupt Mask	
 							bitSet(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
-							// Set ENVIRONMENT Interrupt
-							bitSet(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
-
 						}
+
+						// Set ENVIRONMENT Interrupt
+						bitSet(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
 
 					}
 
