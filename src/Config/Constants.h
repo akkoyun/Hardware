@@ -54,9 +54,11 @@
 #define INTERRUPT_ENVIRONMENT								(uint8_t)4
 #define INTERRUPT_RTC										(uint8_t)5
 #define INTERRUPT_RS485										(uint8_t)6
+#define INTERRUPT_PUMP_START								(uint8_t)7
+#define INTERRUPT_PUMP_STOP									(uint8_t)8
+#define INTERRUPT_PINCHANGE									(uint8_t)9
 #define INTERRUPT_TERMINAL_SENSE							(uint8_t)14
 #define INTERRUPT_TERMINAL_START							(uint8_t)15
-#define INTERRUPT_PINCHANGE									(uint8_t)9
 
 // Status Definitions
 // ---------------------
