@@ -44,12 +44,6 @@
 				// Define Pointers
 				PowerStat_Console* Terminal;
 
-				// Define Interrupt Structure
-				struct Interrupt_Struct {
-					uint16_t Status = 0;
-					uint16_t Buffer = 0;
-				} Interrupt;
-
 				// Module Pin Definitions
 				void Set_PinOut(void) {
 
@@ -307,20 +301,6 @@
 
 				}
 
-				// EEPROM Functions
-				// ----------------
-
-				// Read PUBLISH Register from EEPROM Function
-//				void Read_Register(void) {
-
-					// Read Publish Register
-//					this->Register.Publish = (((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_2__) << 24) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_MSB_1__) << 16) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_2__) << 8) | (uint32_t)RV3028::Read_EEPROM(__EEPROM_PUBLISH_MASK_LSB_1__));
-
-					// Read Stop Register
-//					this->Register.Stop = (((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_2__) << 24) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_MSB_1__) << 16) | ((uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_2__) << 8) | (uint32_t)RV3028::Read_EEPROM(__EEPROM_STOP_MASK_LSB_1__));
-
-//				}
-
 				// Terminal Functions
 				// ------------------
 
@@ -334,23 +314,23 @@
 						if (bitRead(PIN_REGISTER_TERMINAL_SENSE, PIN_TERMINAL_SENSE)) {
 
 							// End Serial Stream
-							if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_START)) {
+							if (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_START)) {
 
 								// End Serial Stream
 								Serial.end();
 
 								// Set Terminal Variable
-								bitClear(this->Interrupt.Status, INTERRUPT_TERMINAL_START);
+								bitClear(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_START);
 
 							}
 
 							// Clear Terminal Variable
-							bitClear(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE);
+							bitClear(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE);
 
 						} else {
 
 							// Start Serial Stream
-							if (!bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_START)) {
+							if (!bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_START)) {
 
 								// Start Serial Stream
 								Serial.begin(115200);
@@ -359,12 +339,12 @@
 								Terminal->Begin();
 
 								// Set Terminal Variable
-								bitSet(this->Interrupt.Status, INTERRUPT_TERMINAL_START);
+								bitSet(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_START);
 
 							}
 
 							// Set Terminal Variable
-							bitSet(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE);
+							bitSet(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE);
 
 						}
 
@@ -382,7 +362,7 @@
 					if (CONTROL_PHASE_R) {
 
 						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PHASE_R__);
+						bitSet(this->Register.Device.Status, __STATUS_PHASE_R__);
 
 						// End Function
 						return true;
@@ -390,7 +370,7 @@
 					} else {
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PHASE_R__);
+						bitClear(this->Register.Device.Status, __STATUS_PHASE_R__);
 
 						// End Function
 						return false;
@@ -404,7 +384,7 @@
 					if (CONTROL_PHASE_S) {
 
 						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PHASE_S__);
+						bitSet(this->Register.Device.Status, __STATUS_PHASE_S__);
 
 						// End Function
 						return true;
@@ -412,7 +392,7 @@
 					} else {
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PHASE_S__);
+						bitClear(this->Register.Device.Status, __STATUS_PHASE_S__);
 
 						// End Function
 						return false;
@@ -426,7 +406,7 @@
 					if (CONTROL_PHASE_T) {
 
 						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PHASE_T__);
+						bitSet(this->Register.Device.Status, __STATUS_PHASE_T__);
 
 						// End Function
 						return true;
@@ -434,7 +414,7 @@
 					} else {
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PHASE_T__);
+						bitClear(this->Register.Device.Status, __STATUS_PHASE_T__);
 
 						// End Function
 						return false;
@@ -448,7 +428,7 @@
 					if (CONTROL_TH) {
 
 						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_TH__);
+						bitSet(this->Register.Device.Status, __STATUS_FAULT_TH__);
 
 						// End Function
 						return true;
@@ -456,7 +436,7 @@
 					} else {
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_FAULT_TH__);
+						bitClear(this->Register.Device.Status, __STATUS_FAULT_TH__);
 
 						// End Function
 						return false;
@@ -470,7 +450,7 @@
 					if (CONTROL_MP) {
 
 						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_MP__);
+						bitSet(this->Register.Device.Status, __STATUS_FAULT_MP__);
 
 						// End Function
 						return true;
@@ -478,7 +458,7 @@
 					} else {
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_FAULT_MP__);
+						bitClear(this->Register.Device.Status, __STATUS_FAULT_MP__);
 
 						// End Function
 						return false;
@@ -492,23 +472,23 @@
 					if (CONTROL_M1 && CONTROL_M2 && !CONTROL_M3) {
 
 						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_PUMP__);
+						bitSet(this->Register.Device.Status, __STATUS_PUMP__);
 
 					} else {
 
 						// Set Status Register
-						bitClear(this->Register.Status, __STATUS_PUMP__);
+						bitClear(this->Register.Device.Status, __STATUS_PUMP__);
 
 					}
 
 					// End Function
-					return (bitRead(this->Register.Status, __STATUS_PUMP__));
+					return (bitRead(this->Register.Device.Status, __STATUS_PUMP__));
 
 				}
 				bool System_Anomaly(void) {
 
 					// Declare Current Status
-					bool _SA_Status = bitRead(this->Register.Status, __STATUS_FAULT_SA__);
+					bool _SA_Status = bitRead(this->Register.Device.Status, __STATUS_FAULT_SA__);
 
 					// Just M1 Active
 					if (CONTROL_M1 && !CONTROL_M2 && !CONTROL_M3) _SA_Status = true;
@@ -535,12 +515,12 @@
 					if (_SA_Status) {
 
 						// Set Status Register
-						bitSet(this->Register.Status, __STATUS_FAULT_SA__);
+						bitSet(this->Register.Device.Status, __STATUS_FAULT_SA__);
 
 					} else {
 
 						// Clear Status Register
-						bitClear(this->Register.Status, __STATUS_FAULT_SA__);
+						bitClear(this->Register.Device.Status, __STATUS_FAULT_SA__);
 
 					}
 
@@ -557,10 +537,35 @@
 
 				// Define Register Structure
 				struct Register_Struct {
-					uint32_t Status = 0;
-					uint32_t Buffer = 0;
-					uint32_t Publish = 0;
-					uint32_t Stop = 0;
+
+					// Define Device Register Structure
+					struct Device_Struct {
+
+						// Define Status Register
+						uint32_t Status = 0;
+
+						// Define Buffer Register
+						uint32_t Buffer = 0;
+
+						// Define Display Register
+						uint32_t Publish = 0;
+
+						// Define Start Register
+						uint32_t Stop = 0;
+
+					} Device;
+
+					// Define Interrupt Structure
+					struct Interrupt_Struct {
+
+						// Define Interrupt Status Register
+						uint32_t Status = 0;
+
+						// Define Interrupt Buffer Register
+						uint32_t Buffer = 0;
+
+					} Interrupt;
+
 				} Register;
 
 				// Module Constructor
@@ -570,8 +575,8 @@
 					this->Set_PinOut();
 
 					// Clear Interrupt Variables
-					this->Interrupt.Status = 0;
-					this->Interrupt.Buffer = 0;
+					this->Register.Interrupt.Status = 0;
+					this->Register.Interrupt.Buffer = 0;
 
 					// Set Instance
 					instance = this;
@@ -585,7 +590,7 @@
 					this->Terminal_Control();
 
 					// Print Firmware Version
-					if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(6, 71, _Console_GRAY_, F(_FIRMWARE_));
+					if (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(6, 71, _Console_GRAY_, F(_FIRMWARE_));
 
 					// Print Hardware Version
 					// TODO: board düzeltilecek
@@ -598,7 +603,7 @@
 					if (!SdFat::begin(53, SD_SCK_MHZ(50))) {
 
 						// Set Status Register
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) bitSet(this->Register.Status, __STATUS_SYSTEM__);
+						bitSet(this->Register.Device.Status, __STATUS_SYSTEM__);
 
 					}
 
@@ -612,69 +617,69 @@
 					if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
 
 						// Set Energy 1 Interrupt
-						bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
+						bitSet(this->Register.Interrupt.Buffer, INTERRUPT_ENERGY_1);
 
 						// Clear Energy 1 Interrupt
-						bitClear(this->Interrupt.Status, INTERRUPT_ENERGY_1);
+						bitClear(this->Register.Interrupt.Status, INTERRUPT_ENERGY_1);
 
 					} else {
 
 						// Clear Energy 1 Interrupt
-						bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
+						bitClear(this->Register.Interrupt.Buffer, INTERRUPT_ENERGY_1);
 
 						// Set Energy 1 Interrupt Status
-						bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_1);
+						bitSet(this->Register.Interrupt.Status, INTERRUPT_ENERGY_1);
 
 					}
 					if (bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
 
 						// Set Energy 2 Interrupt
-						bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
+						bitSet(this->Register.Interrupt.Buffer, INTERRUPT_ENERGY_2);
 
 						// Clear Energy 2 Interrupt
-						bitClear(this->Interrupt.Status, INTERRUPT_ENERGY_2);
+						bitClear(this->Register.Interrupt.Status, INTERRUPT_ENERGY_2);
 
 					} else {
 
 						// Clear Energy 2 Interrupt
-						bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
+						bitClear(this->Register.Interrupt.Buffer, INTERRUPT_ENERGY_2);
 
 						// Set Energy 2 Interrupt Status
-						bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_2);
+						bitSet(this->Register.Interrupt.Status, INTERRUPT_ENERGY_2);
 
 					}
 					if (bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
 
 						// Set Environment Interrupt
-						bitSet(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+						bitSet(this->Register.Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
 						// Clear Environment Interrupt
-						bitClear(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
+						bitClear(this->Register.Interrupt.Status, INTERRUPT_ENVIRONMENT);
 
 					} else {
 
 						// Clear Environment Interrupt
-						bitClear(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+						bitClear(this->Register.Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
 						// Set Environment Interrupt Status
-						bitSet(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
+						bitSet(this->Register.Interrupt.Status, INTERRUPT_ENVIRONMENT);
 
 					}
 					if (bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
 
 						// Set RTC Interrupt
-						bitSet(this->Interrupt.Buffer, INTERRUPT_RTC);
+						bitSet(this->Register.Interrupt.Buffer, INTERRUPT_RTC);
 
 						// Clear RTC Interrupt
-						bitClear(this->Interrupt.Status, INTERRUPT_RTC);
+						bitClear(this->Register.Interrupt.Status, INTERRUPT_RTC);
 
 					} else {
 
 						// Clear RTC Interrupt
-						bitClear(this->Interrupt.Buffer, INTERRUPT_RTC);
+						bitClear(this->Register.Interrupt.Buffer, INTERRUPT_RTC);
 
 						// Set RTC Interrupt Status
-						bitSet(this->Interrupt.Status, INTERRUPT_RTC);
+						bitSet(this->Register.Interrupt.Status, INTERRUPT_RTC);
 
 					}
 
@@ -682,7 +687,7 @@
 					this->PCMSK2_Handler();
 
 					// Set Buffer to Status
-					this->Interrupt.Buffer = this->Interrupt.Status;
+					this->Register.Interrupt.Buffer = this->Register.Interrupt.Status;
 
 					// Disable Interrupts
 					cli();
@@ -761,6 +766,143 @@
 
 				}
 
+				// Status Functions
+				// ---------------
+
+				inline bool is_Pump(void) { return (bitRead(this->Register.Device.Status, __STATUS_PUMP__)); }
+				inline bool is_Phase_R(void) { return (bitRead(this->Register.Device.Status, __STATUS_PHASE_R__)); }
+				inline bool is_Phase_S(void) { return (bitRead(this->Register.Device.Status, __STATUS_PHASE_S__)); }
+				inline bool is_Phase_T(void) { return (bitRead(this->Register.Device.Status, __STATUS_PHASE_T__)); }
+				inline bool is_Power_OK(void) { return (this->is_Phase_R() && this->is_Phase_S() && this->is_Phase_T()); }
+				inline bool is_TPR_Fault(void) { return (bitRead(this->Register.Device.Status, __STATUS_FAULT_TH__)); }
+				inline bool is_MPR_Fault(void) { return (bitRead(this->Register.Device.Status, __STATUS_FAULT_MP__)); }
+				inline bool is_Fault(void) { return (this->is_TPR_Fault() || this->is_MPR_Fault()); }
+				inline bool is_INT_Timer(void) {
+					
+					// Define Return Status
+					bool _Status = bitRead(this->Register.Interrupt.Status, INTERRUPT_TIMER);
+
+					// Control for Clean
+					if (_Status) bitClear(this->Register.Interrupt.Status, INTERRUPT_TIMER);
+
+					// Return Display Interrupt
+					return(_Status);
+				
+				}
+				inline bool is_INT_Display(void) {
+					
+					// Define Return Status
+					bool _Status = bitRead(this->Register.Interrupt.Status, INTERRUPT_DISPLAY);
+
+					// Control for Clean
+					if (_Status) bitClear(this->Register.Interrupt.Status, INTERRUPT_DISPLAY);
+
+					// Return Display Interrupt
+					return(_Status);
+				
+				}
+				inline bool is_INT_Terminal(void) { return (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE)); }
+				inline bool is_INT_Energy_1(void) {
+					
+					// Define Return Status
+					bool _Status = bitRead(this->Register.Interrupt.Status, INTERRUPT_ENERGY_1);
+
+					// Control for Clean
+					if (_Status) bitClear(this->Register.Interrupt.Status, INTERRUPT_ENERGY_1);
+
+					// Return Energy 1 Interrupt
+					return(_Status);
+				
+				}
+				inline bool is_INT_Energy_2(void) {
+					
+					// Define Return Status
+					bool _Status = bitRead(this->Register.Interrupt.Status, INTERRUPT_ENERGY_2);
+
+					// Control for Clean
+					if (_Status) bitClear(this->Register.Interrupt.Status, INTERRUPT_ENERGY_2);
+
+					// Return Energy 2 Interrupt
+					return(_Status);
+				
+				}
+				inline bool is_INT_Energy(void) { return (this->is_INT_Energy_1() || this->is_INT_Energy_2()); }
+				inline bool is_INT_Environment(void) {
+					
+					// Define Return Status
+					bool _Status = bitRead(this->Register.Interrupt.Status, INTERRUPT_ENVIRONMENT);
+
+					// Control for Clean
+					if (_Status) bitClear(this->Register.Interrupt.Status, INTERRUPT_ENVIRONMENT);
+
+					// Return Environment Interrupt
+					return(_Status);
+				
+				}
+				inline bool is_INT_RS485(void) {
+					
+					// Define Return Status
+					bool _Status = bitRead(this->Register.Interrupt.Status, INTERRUPT_RS485);
+
+					// Control for Clean
+					if (_Status) bitClear(this->Register.Interrupt.Status, INTERRUPT_RS485);
+
+					// Return RS485 Interrupt
+					return(_Status);
+				
+				}
+				inline bool is_INT_RTC(void) {
+					
+					// Define Return Status
+					bool _Status = bitRead(this->Register.Interrupt.Status, INTERRUPT_RTC);
+
+					// Control for Clean
+					if (_Status) bitClear(this->Register.Interrupt.Status, INTERRUPT_RTC);
+
+					// Return RTC Interrupt
+					return(_Status);
+				
+				}
+				inline bool is_INT_PinChange(void) {
+					
+					// Define Return Status
+					bool _Status = bitRead(this->Register.Interrupt.Status, INTERRUPT_PINCHANGE);
+
+					// Control for Clean
+					if (_Status) bitClear(this->Register.Interrupt.Status, INTERRUPT_PINCHANGE);
+
+					// Return Pin Change Interrupt
+					return(_Status);
+				
+				}
+				inline bool is_INT_Pump_Start(void) {
+					
+					// Define Return Status
+					bool _Status = bitRead(this->Register.Interrupt.Status, INTERRUPT_PUMP_START);
+
+					// Control for Clean
+					if (_Status) bitClear(this->Register.Interrupt.Status, INTERRUPT_PUMP_START);
+
+					// Return Pump Start Interrupt
+					return(_Status);
+				
+				}
+				inline bool is_INT_Pump_Stop(void) {
+					
+					// Define Return Status
+					bool _Status = bitRead(this->Register.Interrupt.Status, INTERRUPT_PUMP_STOP);
+
+					// Control for Clean
+					if (_Status) bitClear(this->Register.Interrupt.Status, INTERRUPT_PUMP_STOP);
+
+					// Return Pump Stop Interrupt
+					return(_Status);
+				
+				}
+				inline void set_System_Fault(void) { bitSet(this->Register.Device.Status, __STATUS_FAULT_SA__); }
+				inline void clr_System_Fault(void) { bitClear(this->Register.Device.Status, __STATUS_FAULT_SA__); }
+				inline void update_Device_Buffer(void) { this->Register.Device.Buffer = this->Register.Device.Status; }
+
 				// Relay Functions
 				// ---------------
 
@@ -796,6 +938,7 @@
 
 					}
 
+				
 
 
 
@@ -814,10 +957,10 @@
 				void TIMER5_Handler(void) {
 
 					// Set Timer Interrupt
-					bitSet(this->Interrupt.Status, INTERRUPT_TIMER);
+					bitSet(this->Register.Interrupt.Status, INTERRUPT_TIMER);
 
 					// Set Display Interrupt
-					bitSet(this->Interrupt.Status, INTERRUPT_DISPLAY);
+					bitSet(this->Register.Interrupt.Status, INTERRUPT_DISPLAY);
 
 				}
 
@@ -831,7 +974,7 @@
 				void INT4_Handler(void) {
 
 					// Set RS485 Interrupt
-					bitSet(this->Interrupt.Status, INTERRUPT_RS485);
+					bitSet(this->Register.Interrupt.Status, INTERRUPT_RS485);
 
 				}
 
@@ -845,84 +988,84 @@
 				void PCMSK0_Handler(void) {
 
 					// Control for ENERGY Interrupt
-					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENERGY_1) != !bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
+					if (bitRead(this->Register.Interrupt.Buffer, INTERRUPT_ENERGY_1) != !bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
 
 						// Set ENERGY 1 Interrupt
 						if (bitRead(PIN_REGISTER_INT_ENERGY_1, PIN_INT_ENERGY_1)) {
 
 							// Clear ENERGY 1 Interrupt Mask
-							bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
+							bitClear(this->Register.Interrupt.Buffer, INTERRUPT_ENERGY_1);
 							
 						} else {
 
 							// Set ENERGY 1 Interrupt Mask
-							bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_1);
+							bitSet(this->Register.Interrupt.Buffer, INTERRUPT_ENERGY_1);
 
 						}
 
 						// Set ENERGY 1 Interrupt
-						bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_1);
+						bitSet(this->Register.Interrupt.Status, INTERRUPT_ENERGY_1);
 
 					}
 
 					// Control for ENERGY Interrupt
-					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENERGY_2) != !bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
+					if (bitRead(this->Register.Interrupt.Buffer, INTERRUPT_ENERGY_2) != !bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
 
 						// Set ENERGY Interrupt
 						if (bitRead(PIN_REGISTER_INT_ENERGY_2, PIN_INT_ENERGY_2)) {
 
 							// Clear ENERGY Interrupt Mask
-							bitClear(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
+							bitClear(this->Register.Interrupt.Buffer, INTERRUPT_ENERGY_2);
 							
 						} else {
 							
 							// Set ENERGY Interrupt Mask
-							bitSet(this->Interrupt.Buffer, INTERRUPT_ENERGY_2);
+							bitSet(this->Register.Interrupt.Buffer, INTERRUPT_ENERGY_2);
 
 						}
 
 						// Set ENERGY Interrupt
-						bitSet(this->Interrupt.Status, INTERRUPT_ENERGY_2);
+						bitSet(this->Register.Interrupt.Status, INTERRUPT_ENERGY_2);
 
 					}
 
 					// Control for ENVIRONMENT Interrupt
-					if (bitRead(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT) != !bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
+					if (bitRead(this->Register.Interrupt.Buffer, INTERRUPT_ENVIRONMENT) != !bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
 
 						// Set ENVIRONMENT Interrupt
 						if (bitRead(PIN_REGISTER_INT_ENV, PIN_INT_ENV)) {
 
 							// Clear ENVIRONMENT Interrupt Mask
-							bitClear(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+							bitClear(this->Register.Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
 						} else {
 							
 							// Set ENVIRONMENT Interrupt Mask	
-							bitSet(this->Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+							bitSet(this->Register.Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
 						}
 
 						// Set ENVIRONMENT Interrupt
-						bitSet(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
+						bitSet(this->Register.Interrupt.Status, INTERRUPT_ENVIRONMENT);
 
 					}
 
 					// Control for RTC Interrupt
-					if (bitRead(this->Interrupt.Buffer, INTERRUPT_RTC) != !bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
+					if (bitRead(this->Register.Interrupt.Buffer, INTERRUPT_RTC) != !bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
 
 						// Set RTC Interrupt
 						if (bitRead(PIN_REGISTER_INT_RTC, PIN_INT_RTC)) {
 							
 							// Clear RTC Interrupt Mask
-							bitClear(this->Interrupt.Buffer, INTERRUPT_RTC);
+							bitClear(this->Register.Interrupt.Buffer, INTERRUPT_RTC);
 							
 						} else {
 
 							// Set RTC Interrupt Mask
-							bitSet(this->Interrupt.Buffer, INTERRUPT_RTC);
+							bitSet(this->Register.Interrupt.Buffer, INTERRUPT_RTC);
 
 							// Set RTC Interrupt
-							bitSet(this->Interrupt.Status, INTERRUPT_RTC);
+							bitSet(this->Register.Interrupt.Status, INTERRUPT_RTC);
 
 						}
 
@@ -944,9 +1087,6 @@
 				}
 				void PCMSK2_Handler(void) {
 
-					// Handler Delay
-					delay(5);
-
 					// Handle Phase Status
 					this->Phase_R();
 					this->Phase_S();
@@ -963,190 +1103,26 @@
 					this->System_Anomaly();
 
 					// Control for Buffer
-					if (this->Interrupt.Status != this->Interrupt.Buffer) {
+					if (this->Register.Interrupt.Status != this->Register.Interrupt.Buffer) {
 
 						// Control for Pump Start/Stop
-						if ((bitRead(this->Register.Status, __STATUS_PUMP__) != bitRead(this->Register.Buffer, __STATUS_PUMP__))) {
+						if ((bitRead(this->Register.Device.Status, __STATUS_PUMP__) != bitRead(this->Register.Device.Buffer, __STATUS_PUMP__))) {
 
 							// Control for Pump Start
-							if (bitRead(this->Register.Status, __STATUS_PUMP__)) bitSet(this->Interrupt.Status, INTERRUPT_PUMP_START);
+							if (bitRead(this->Register.Device.Status, __STATUS_PUMP__)) bitSet(this->Register.Interrupt.Status, INTERRUPT_PUMP_START);
 
 							// Control for Pump Stop
-							if (!bitRead(this->Register.Status, __STATUS_PUMP__)) bitSet(this->Interrupt.Status, INTERRUPT_PUMP_STOP);
+							if (!bitRead(this->Register.Device.Status, __STATUS_PUMP__)) bitSet(this->Register.Interrupt.Status, INTERRUPT_PUMP_STOP);
 
 						}
 
 						// Set Interrupt to Status
-						bitSet(this->Interrupt.Status, INTERRUPT_PINCHANGE);
+						bitSet(this->Register.Interrupt.Status, INTERRUPT_PINCHANGE);
 
 						// Set Buffer to Status
-						this->Interrupt.Buffer = this->Interrupt.Status;
+						this->Register.Interrupt.Buffer = this->Register.Interrupt.Status;
 
 					}
-
-				}
-
-				// Interrupt Handler Function
-				inline bool Interrupt_Handler(const uint8_t _Type = INTERRUPT_RTC, const bool _Clean = false) {
-
-					// Define Return Status
-					bool _Status = false;
-
-					// Control for Type
-					switch (_Type) {
-
-						// Timer
-						case INTERRUPT_TIMER: {
-
-							// Read Status
-							_Status = bitRead(this->Interrupt.Status, INTERRUPT_TIMER);
-
-							// Control for Clean
-							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_TIMER);
-
-							// Return Display Interrupt
-							return(_Status);
-
-						}
-
-						// Display
-						case INTERRUPT_DISPLAY: {
-
-							// Read Status
-							_Status = bitRead(this->Interrupt.Status, INTERRUPT_DISPLAY);
-
-							// Control for Clean
-							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_DISPLAY);
-
-							// Return Display Interrupt
-							return(_Status);
-
-						}
-
-						// Energy 1
-						case INTERRUPT_ENERGY_1: {
-
-							// Read Status
-							_Status = bitRead(this->Interrupt.Status, INTERRUPT_ENERGY_1);
-
-							// Control for Clean
-							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_ENERGY_1);
-
-							// Return Energy 1 Interrupt
-							return(_Status);
-
-						}
-
-						// Energy 2
-						case INTERRUPT_ENERGY_2: {
-
-							// Read Status
-							_Status = bitRead(this->Interrupt.Status, INTERRUPT_ENERGY_2);
-
-							// Control for Clean
-							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_ENERGY_2);
-
-							// Return Energy 2 Interrupt
-							return(_Status);
-
-						}
-
-						// Environment
-						case INTERRUPT_ENVIRONMENT: {
-
-							// Read Status
-							_Status = bitRead(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
-
-							// Control for Clean
-							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_ENVIRONMENT);
-
-							// Return Environment Interrupt
-							return(_Status);
-
-						}
-
-						// RS485
-						case INTERRUPT_RS485: {
-
-							// Read Status
-							_Status = bitRead(this->Interrupt.Status, INTERRUPT_RS485);
-
-							// Control for Clean
-							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_RS485);
-
-							// Return RS485 Interrupt
-							return(_Status);
-
-						}
-
-						// RTC
-						case INTERRUPT_RTC: {
-
-							// Read Status
-							_Status = bitRead(this->Interrupt.Status, INTERRUPT_RTC);
-
-							// Control for Clean
-							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_RTC);
-
-							// Return RTC Interrupt
-							return(_Status);
-
-						}
-
-						// Pin Change
-						case INTERRUPT_PINCHANGE: {
-
-							// Read Status
-							_Status = bitRead(this->Interrupt.Status, INTERRUPT_PINCHANGE);
-
-							// Control for Clean
-							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_PINCHANGE);
-
-							// Return Pin Change Interrupt
-							return(_Status);
-
-						}
-
-						// Pump Start
-						case INTERRUPT_PUMP_START: {
-
-							// Read Status
-							_Status = bitRead(this->Interrupt.Status, INTERRUPT_PUMP_START);
-
-							// Control for Clean
-							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_PUMP_START);
-
-							// Return Pump Start Interrupt
-							return(_Status);
-
-						}
-
-						// Pump Stop
-						case INTERRUPT_PUMP_STOP: {
-
-							// Read Status
-							_Status = bitRead(this->Interrupt.Status, INTERRUPT_PUMP_STOP);
-
-							// Control for Clean
-							if (_Clean && _Status) bitClear(this->Interrupt.Status, INTERRUPT_PUMP_STOP);
-
-							// Return Pump Stop Interrupt
-							return(_Status);
-
-						}
-
-					}
-
-					// End Function
-					return(false);
-
-				}
-
-				// Terminal Status Function
-				inline bool Terminal_Status(void) {
-
-					// Return Terminal Status
-					return(bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE));
 
 				}
 
@@ -1263,6 +1239,87 @@
 
 						}
 
+						// Yellow Color
+						case LED_YELLOW: {
+
+							// Blink
+							for (size_t i = 0; i < _Blink; i++) {
+
+								// Turn ON Yellow LED
+								PORT_MCU_LED_RED |= (1 << PIN_MCU_LED_RED);
+								PORT_MCU_LED_GREEN |= (1 << PIN_MCU_LED_GREEN);
+
+								// Delay
+								delay(_Interval);
+
+								// Turn OFF Yellow LED
+								PORT_MCU_LED_RED &= ~(1 << PIN_MCU_LED_RED);
+								PORT_MCU_LED_GREEN &= ~(1 << PIN_MCU_LED_GREEN);
+
+								// Delay
+								delay(_Interval);
+
+							}
+
+							// End Case
+							break;
+
+						}
+
+						// Magenta Color
+						case LED_MAGENTA: {
+
+							// Blink
+							for (size_t i = 0; i < _Blink; i++) {
+
+								// Turn ON Magenta LED
+								PORT_MCU_LED_RED |= (1 << PIN_MCU_LED_RED);
+								PORT_MCU_LED_BLUE |= (1 << PIN_MCU_LED_BLUE);
+
+								// Delay
+								delay(_Interval);
+
+								// Turn OFF Magenta LED
+								PORT_MCU_LED_RED &= ~(1 << PIN_MCU_LED_RED);
+								PORT_MCU_LED_BLUE &= ~(1 << PIN_MCU_LED_BLUE);
+
+								// Delay
+								delay(_Interval);
+
+							}
+
+							// End Case
+							break;
+
+						}
+
+						// Cyan Color
+						case LED_CYAN: {
+
+							// Blink
+							for (size_t i = 0; i < _Blink; i++) {
+
+								// Turn ON Cyan LED
+								PORT_MCU_LED_GREEN |= (1 << PIN_MCU_LED_GREEN);
+								PORT_MCU_LED_BLUE |= (1 << PIN_MCU_LED_BLUE);
+
+								// Delay
+								delay(_Interval);
+
+								// Turn OFF Cyan LED
+								PORT_MCU_LED_GREEN &= ~(1 << PIN_MCU_LED_GREEN);
+								PORT_MCU_LED_BLUE &= ~(1 << PIN_MCU_LED_BLUE);
+
+								// Delay
+								delay(_Interval);
+
+							}
+
+							// End Case
+							break;
+
+						}
+
 						// Default
 						default: {
 
@@ -1296,7 +1353,7 @@
 					if (_LED) {
 
 						// Blink LED
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {this->LED(LED_GREEN, 1, 50);} else {this->LED(LED_RED, 1, 50);}
+						if (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {this->LED(LED_GREEN, 1, 50);} else {this->LED(LED_YELLOW, 1, 50);}
 
 					}
 
@@ -1304,15 +1361,15 @@
 					PORT_HEARTBEAT &= ~(1 << PIN_HEARTBEAT);
 
 					// Print Interrupt Status
-					if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
+					if (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) {
 
 						// Control for Display Interrupt
-						if (this->Interrupt_Handler(INTERRUPT_DISPLAY)) {
+						if (this->is_INT_Display()) {
 
 							// Print Register Status
-							Console.Show_Status(REGISTER_STATUS, this->Register.Status);
-							Console.Show_Status(REGISTER_PUBLISH, this->Register.Publish);
-							Console.Show_Status(REGISTER_STOP, this->Register.Stop);
+							Console.Show_Status(REGISTER_STATUS, this->Register.Device.Status);
+							Console.Show_Status(REGISTER_PUBLISH, this->Register.Device.Publish);
+							Console.Show_Status(REGISTER_STOP, this->Register.Device.Stop);
 
 						}
 
@@ -1381,7 +1438,7 @@
 					for (uint8_t i = 84; i < 120; i++) {
 
 						// Print Progress Bar
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(21, i, _Console_GRAY_, F("█"));
+						if (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Text(21, i, _Console_GRAY_, F("█"));
 
 						// Command Delay
 						delay(_Time / 35);
@@ -1389,7 +1446,7 @@
 					}
 
 					// Clear Progress Bar
-					if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Space(21, 84, 36);
+					if (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Space(21, 84, 36);
 
 					// Set PIN_GSM_ONOFF Signal LOW
 					PORT_GSM_ONOFF &= ~(1 << PIN_GSM_ONOFF);
@@ -1453,13 +1510,13 @@
 					} else {
 
 						// Print Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Powering ON GSM Modem..."));
+						if (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Powering ON GSM Modem..."));
 
 						// Send On Off Signal
 						this->OnOff(1500);
 
 						// Print Message
-						if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Waiting for Power Monitor..."));
+						if (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Waiting for Power Monitor..."));
 
 						// Wait for Power Monitor
 						while (millis() - _Start_Time < 15000) {
@@ -1468,7 +1525,7 @@
 							if (this->PowerMonitor()) {
 
 								// Print Message
-								if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Waiting for Ready..."));
+								if (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Waiting for Ready..."));
 
 								// Wait for Software Ready
 								while (millis() - _Start_Time < 30000) {
@@ -1499,7 +1556,7 @@
 				bool OFF(void) {
 
 					// Print Message
-					if (bitRead(this->Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Powering OFF GSM Modem..."));
+					if (bitRead(this->Register.Interrupt.Status, INTERRUPT_TERMINAL_SENSE)) Terminal->Show_Message(_Console_CYAN_, F("Powering OFF GSM Modem..."));
 
 					// Turn Off Modem
 					if (this->PowerMonitor()) {

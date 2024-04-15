@@ -10,6 +10,8 @@
 #define LED_BLUE											(uint8_t)3
 #define LED_WHITE											(uint8_t)4
 #define LED_YELLOW											(uint8_t)5
+#define LED_CYAN											(uint8_t)6
+#define LED_MAGENTA											(uint8_t)7
 
 // Relay Definitions
 // -----------------------------
