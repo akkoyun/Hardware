@@ -89,8 +89,8 @@
 #ifndef __STATUS_I_IMBALANCE__
     #define __STATUS_I_IMBALANCE__	(uint8_t)26
 #endif
-#ifndef __STATUS_ENV__
-    #define __STATUS_ENV__			(uint8_t)30
+#ifndef __STATUS_ENVIRONMENT__
+    #define __STATUS_ENVIRONMENT__	(uint8_t)30
 #endif
 #ifndef __STATUS_SYSTEM__
     #define __STATUS_SYSTEM__		(uint8_t)31

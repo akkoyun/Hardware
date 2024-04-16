@@ -1039,7 +1039,7 @@
 							bitClear(this->Register.Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
 							// Set Device Status
-							bitClear(this->Register.Device.Status, __STATUS_ENV__);
+							bitClear(this->Register.Device.Status, __STATUS_ENVIRONMENT__);
 
 						} else {
 							
@@ -1047,7 +1047,7 @@
 							bitSet(this->Register.Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
 							// Set Device Status
-							bitSet(this->Register.Device.Status, __STATUS_ENV__);
+							bitSet(this->Register.Device.Status, __STATUS_ENVIRONMENT__);
 
 						}
 
