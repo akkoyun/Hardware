@@ -1038,10 +1038,16 @@
 							// Clear ENVIRONMENT Interrupt Mask
 							bitClear(this->Register.Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
 
+							// Set Device Status
+							bitClear(this->Register.Device.Status, __STATUS_ENV__);
+
 						} else {
 							
 							// Set ENVIRONMENT Interrupt Mask	
 							bitSet(this->Register.Interrupt.Buffer, INTERRUPT_ENVIRONMENT);
+
+							// Set Device Status
+							bitSet(this->Register.Device.Status, __STATUS_ENV__);
 
 						}
 
