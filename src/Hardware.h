@@ -901,7 +901,22 @@
 				}
 				inline void set_System_Fault(void) { bitSet(this->Register.Device.Status, __STATUS_FAULT_SA__); }
 				inline void clr_System_Fault(void) { bitClear(this->Register.Device.Status, __STATUS_FAULT_SA__); }
-				inline void update_Device_Buffer(void) { this->Register.Device.Buffer = this->Register.Device.Status; }
+
+				// Publish Functions
+				bool Publish_Decide(uint8_t _Control_Bit) {
+
+					// Control for Bit Change
+					if (bitRead(this->Register.Device.Status, _Control_Bit) != bitRead(this->Register.Device.Buffer, _Control_Bit)) {
+
+						// Control for Publish
+						if (bitRead(this->Register.Device.Publish, _Control_Bit)) return true;
+
+					}
+
+					// End Function
+					return false;
+
+				}
 
 				// Relay Functions
 				// ---------------
@@ -1124,9 +1139,6 @@
 
 						// Set Interrupt to Status
 						bitSet(this->Register.Interrupt.Status, INTERRUPT_PINCHANGE);
-
-						// Set Buffer to Status
-						this->Register.Interrupt.Buffer = this->Register.Interrupt.Status;
 
 					}
 
